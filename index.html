@@ -105,6 +105,22 @@
         ::-webkit-scrollbar-thumb {
           @apply bg-sage-300/50 rounded-full hover:bg-sage-400 transition-colors;
         }
+
+        /* Fix html2canvas crash with backdrop-filter */
+        body.is-capturing .glass-card {
+            background-color: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        body.is-capturing .animate-slow-fade,
+        body.is-capturing .animate-slide-up, 
+        body.is-capturing .animate-card-fade-in-up {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
     </style>
   <link rel="stylesheet" href="/index.css">
 </head>
