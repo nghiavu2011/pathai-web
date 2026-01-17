@@ -90,24 +90,32 @@ const App: React.FC = () => {
   const [loadingUser, setLoadingUser] = useState(true);
 
   // Sync Auth State
+  // Sync Auth State - BYPASS AUTH FOR NOW
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        try {
-          const snap = await getDoc(userRef);
-          if (snap.exists()) {
-            setUserData({ ...snap.data() as UserData, uid: user.uid });
-          }
-        } catch (e) {
-          console.error("Error fetching user profile", e);
-        }
-      } else {
-        setUserData(null);
-      }
-      setLoadingUser(false);
-    });
-    return () => unsubscribe();
+    // Simulate logged in user immediately
+    const tempUser: UserData = {
+      uid: 'user-guest-' + Date.now(),
+      fullName: 'Khách',
+      email: 'guest@pathai.com',
+      birthYear: '2000',
+      gender: 'Khác',
+      location: 'Việt Nam',
+      status: 'Khách tham quan',
+      educationLevel: 'Khác',
+      source: 'Trực tiếp',
+      expectations: 'Tìm hiểu bản thân',
+      avatarUrl: ''
+    };
+
+    // Check if we already have a profile in localStorage
+    const stored = localStorage.getItem('localUserProfile');
+    if (stored) {
+      setUserData(JSON.parse(stored));
+    } else {
+      setUserData(tempUser);
+      localStorage.setItem('localUserProfile', JSON.stringify(tempUser));
+    }
+    setLoadingUser(false);
   }, []);
 
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
@@ -120,33 +128,18 @@ const App: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
 
   // Load User Data (History & Goals) from Firestore
+  // Load User Data (History & Goals) from localStorage (Offline Mode)
   useEffect(() => {
-    if (!userData?.uid) {
-      setHistory([]);
-      setGoals([]);
-      return;
+    try {
+      const historyLocal = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+      setHistory(historyLocal);
+
+      const goalsLocal = JSON.parse(localStorage.getItem('goals') || '[]');
+      setGoals(goalsLocal);
+    } catch (e) {
+      console.error("Error loading local data", e);
     }
-
-    const fetchData = async () => {
-      try {
-        // Load History
-        const historyRef = collection(db, "users", userData.uid!, "history");
-        const historySnap = await getDocs(historyRef);
-        const historyData = historySnap.docs.map(d => ({ ...d.data(), id: d.id } as QuizHistoryEntry));
-        // Sort by timestamp desc
-        setHistory(historyData.sort((a, b) => b.timestamp - a.timestamp));
-
-        // Load Goals
-        const goalsRef = collection(db, "users", userData.uid!, "goals");
-        const goalsSnap = await getDocs(goalsRef);
-        const goalsData = goalsSnap.docs.map(d => ({ ...d.data(), id: d.id } as Goal));
-        setGoals(goalsData.sort((a, b) => b.createdAt - a.createdAt));
-      } catch (e) {
-        console.error("Error loading user data", e);
-      }
-    };
-    fetchData();
-  }, [userData?.uid]);
+  }, []);
 
   const [isDonateModalOpen, setDonateModalOpen] = useState(false);
   const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -444,15 +437,15 @@ const App: React.FC = () => {
   }, [goals]);
 
   // Auth Handling
+  // Auth Handling
   const handleLogin = (data: UserData) => {
     setUserData(data);
-    // localStorage backup removed in favor of Firebase state
+    localStorage.setItem('localUserProfile', JSON.stringify(data));
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
-    setUserData(null);
-    handleGoHome();
+    localStorage.removeItem('localUserProfile');
+    window.location.reload(); // Simple reload to reset state
   };
 
   useEffect(() => {
@@ -507,9 +500,10 @@ const App: React.FC = () => {
     setResults(calculatedResults);
 
     // Save to Firestore and State
-    if (userData && userData.uid) {
+    // Save to LocalStorage
+    if (userData) {
       const newHistoryEntry: QuizHistoryEntry = {
-        id: `${selectedQuizId}-${Date.now()}`, // Tmp ID
+        id: `${selectedQuizId}-${Date.now()}`,
         quizId: selectedQuizId!,
         quizTitle: config.title,
         timestamp: Date.now(),
@@ -518,19 +512,9 @@ const App: React.FC = () => {
         answers: quizState.answers,
       };
 
-      // Add to State immediately for UI
-      setHistory(prev => [newHistoryEntry, ...prev]);
-
-      // Persist
-      const saveToDb = async () => {
-        try {
-          const historyRef = collection(db, "users", userData.uid!, "history");
-          await addDoc(historyRef, newHistoryEntry);
-        } catch (e) {
-          console.error("Failed to save history", e);
-        }
-      };
-      saveToDb();
+      const updatedHistory = [newHistoryEntry, ...history];
+      setHistory(updatedHistory);
+      localStorage.setItem('quizHistory', JSON.stringify(updatedHistory));
     }
     setCurrentView('results');
   };
@@ -549,52 +533,35 @@ const App: React.FC = () => {
 
   const handleDeleteResult = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa kết quả này?')) {
-      setHistory(prev => prev.filter(entry => entry.id !== id));
-      if (userData?.uid) {
-        try {
-          await deleteDoc(doc(db, "users", userData.uid, "history", id));
-        } catch (e) { console.error("Error deleting history", e); }
-      }
+      const updated = history.filter(entry => entry.id !== id);
+      setHistory(updated);
+      localStorage.setItem('quizHistory', JSON.stringify(updated));
     }
   };
 
   const handleAddGoal = async (goal: Omit<Goal, 'id' | 'createdAt' | 'status'>) => {
     const newGoalBase = {
       ...goal,
+      id: `goal-${Date.now()}`,
       createdAt: Date.now(),
       status: 'todo' as const,
     };
 
-    // Optimistic UI update (using temporary ID)
-    const tempId = `temp-${Date.now()}`;
-    setGoals(prev => [{ ...newGoalBase, id: tempId }, ...prev]);
-
-    if (userData?.uid) {
-      try {
-        const docRef = await addDoc(collection(db, "users", userData.uid, "goals"), newGoalBase);
-        // Update the temporary ID to real ID
-        setGoals(prev => prev.map(g => g.id === tempId ? { ...g, id: docRef.id } : g));
-      } catch (e) { console.error("Error adding goal", e); }
-    }
+    const updatedGoals = [newGoalBase, ...goals];
+    setGoals(updatedGoals);
+    localStorage.setItem('goals', JSON.stringify(updatedGoals));
   };
 
   const handleUpdateGoal = async (updatedGoal: Goal) => {
-    setGoals(prev => prev.map(g => g.id === updatedGoal.id ? updatedGoal : g));
-    if (userData?.uid) {
-      try {
-        const goalRef = doc(db, "users", userData.uid, "goals", updatedGoal.id);
-        await setDoc(goalRef, updatedGoal);
-      } catch (e) { console.error("Error updating goal", e); }
-    }
+    const updatedGoals = goals.map(g => g.id === updatedGoal.id ? updatedGoal : g);
+    setGoals(updatedGoals);
+    localStorage.setItem('goals', JSON.stringify(updatedGoals));
   };
 
   const handleDeleteGoal = async (id: string) => {
-    setGoals(prev => prev.filter(g => g.id !== id));
-    if (userData?.uid) {
-      try {
-        await deleteDoc(doc(db, "users", userData.uid, "goals", id));
-      } catch (e) { console.error("Error deleting goal", e); }
-    }
+    const updatedGoals = goals.filter(g => g.id !== id);
+    setGoals(updatedGoals);
+    localStorage.setItem('goals', JSON.stringify(updatedGoals));
   };
 
   const currentQuizConfig = selectedQuizId ? QUIZ_CONFIGS[selectedQuizId] : null;
@@ -605,7 +572,8 @@ const App: React.FC = () => {
   }
 
   if (!userData) {
-    return <Login onLogin={handleLogin} />;
+    // Should generally not happen due to auto-guest login, but keeps type safety
+    return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
   }
 
   const renderContent = () => {
