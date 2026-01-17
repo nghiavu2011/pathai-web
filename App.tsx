@@ -555,7 +555,7 @@ const App: React.FC = () => {
 
   if (!userData) {
     // Should generally not happen due to auto-guest login, but keeps type safety
-    return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
+    return <Login onLogin={handleLogin} />;
   }
 
   const renderContent = () => {
