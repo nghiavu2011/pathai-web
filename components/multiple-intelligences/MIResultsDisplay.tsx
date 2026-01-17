@@ -1,0 +1,95 @@
+
+import React, { useMemo } from 'react';
+import { MIResults, Answers, UserData, MICategoryKey } from '../../types';
+import { MI_RESULT_DETAILS, MI_CAREER_SUGGESTIONS } from '../../constants/multipleIntelligences';
+import RadarChart from '../shared/RadarChart';
+import BaseResultPage from '../shared/BaseResultPage';
+
+interface MIResultsDisplayProps {
+  results: MIResults;
+  answers: Answers;
+  onGoHome: () => void;
+  onBackToHistory?: () => void;
+  userData: UserData | null;
+  quizId: string;
+  quizTitle: string;
+  onAddGoal: (goal: any) => void;
+  theme: string;
+}
+
+const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
+  const { results, userData } = props;
+  
+  const sortedResults = useMemo(() => {
+    return (Object.keys(results) as MICategoryKey[])
+      .map(key => ({
+        key,
+        name: MI_RESULT_DETAILS[key].name,
+        description: MI_RESULT_DETAILS[key].description,
+        score: results[key] / 5 * 100, // Normalize score to 100 for chart
+        originalScore: results[key]
+      }))
+      .sort((a, b) => b.originalScore - a.originalScore);
+  }, [results]);
+
+  const radarChartData = sortedResults.map(r => ({
+    axis: r.name.split('–')[0].trim(),
+    value: r.score
+  }));
+
+  const topThree = sortedResults.slice(0, 3);
+  const topIntelligencesString = topThree.map(r => `**${r.name}**`).join(', ');
+
+  // Texts
+  const analysisContent = `Kết quả của bạn cho thấy 3 loại hình trí thông minh nổi trội nhất là: ${topIntelligencesString}. Điều này cho thấy bạn có tiềm năng lớn trong các lĩnh vực đòi hỏi sự kết hợp giữa các thế mạnh này.`;
+  const systemInstruction = `Bạn là chuyên gia về Thuyết Trí thông minh Đa diện. Phân tích kết quả: ${JSON.stringify(results)}. Đưa ra lời khuyên học tập và nghề nghiệp.`;
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r=>r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
+  const topIntelligencesStringForSearch = topThree.map(r => r.name.split('–')[0].trim()).join(', ');
+  const newsQuery = `cách phát triển và ứng dụng trí thông minh ${topIntelligencesStringForSearch} trong sự nghiệp`;
+
+  return (
+    <BaseResultPage
+      {...props}
+      analysisContent={
+        <>
+          <p className="text-slate-700 dark:text-slate-300 mb-6">{analysisContent.replace(/\*\*/g, '')}</p>
+          <div className="grid gap-4">
+             {sortedResults.map(result => {
+                const careerSuggestion = MI_CAREER_SUGGESTIONS.find(c => c.code === result.key);
+                return (
+                    <div key={result.key} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-teal-400 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                            <h4 className="font-bold text-base text-teal-700 dark:text-teal-400">{result.name}</h4>
+                            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{result.description}</p>
+                        </div>
+                        <span className="font-mono font-bold text-lg bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
+                            {result.originalScore}/5
+                        </span>
+                      </div>
+                      {careerSuggestion && (
+                          <div className="mt-3 text-sm">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">Gợi ý nghề: </span>
+                              <span className="text-slate-600 dark:text-slate-400">{careerSuggestion.careers}</span>
+                          </div>
+                      )}
+                    </div>
+                )
+             })}
+          </div>
+        </>
+      }
+      renderCharts={() => (
+        <div className="flex justify-center py-4">
+          <RadarChart data={radarChartData} color="teal" />
+        </div>
+      )}
+      systemInstruction={systemInstruction}
+      initialMessage={initialMessage}
+      newsQuery={newsQuery}
+      chatbotPrompts={[`Làm sao phát triển ${topThree[0].name.split('–')[0]}?`, `Cách học tập hiệu quả?`, `Ngành nghề phù hợp?`]}
+    />
+  );
+};
+
+export default MIResultsDisplay;

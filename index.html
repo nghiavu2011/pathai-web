@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi" class="">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PathAI - Hành Trình Thấu Hiểu Bản Thân</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            'sage': {
+              50: '#F4F7F5',
+              100: '#E3E9E5',
+              200: '#C5D3C9',
+              300: '#A3B9A9',
+              400: '#829E8A',
+              500: '#64826C', // Primary Green
+              600: '#4A6753', // Deep Green (Icon color)
+              700: '#354D3D',
+              800: '#24352A',
+              900: '#162019',
+            },
+            'cream': {
+              50: '#FFFEFC',
+              100: '#F9F7F2', // Warm Background
+              200: '#F0EBE0',
+              300: '#E6DCC9',
+            },
+            'accent': {
+              light: '#D4C5A8',
+              DEFAULT: '#BFA575', // Gold/Bronze accent
+              dark: '#967D50',
+            }
+          },
+          borderRadius: {
+            '2xl': '16px',
+            '3xl': '24px',
+            '4xl': '32px',
+          },
+          animation: {
+            'slow-fade': 'slow-fade 1.5s ease-out forwards',
+            'slide-up': 'slide-up 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+          },
+          keyframes: {
+            'slow-fade': {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            'slide-up': {
+              '0%': { opacity: '0', transform: 'translateY(40px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          boxShadow: {
+            'soft': '0 20px 40px -15px rgba(0, 0, 0, 0.05)',
+            'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+        
+        body {
+            @apply font-sans bg-cream-50 text-slate-800 transition-colors duration-700;
+        }
+
+        .glass-card {
+            @apply bg-white/80 backdrop-blur-md border border-white/60 shadow-card;
+        }
+
+        .text-balance {
+            text-wrap: balance;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          @apply bg-sage-300/50 rounded-full hover:bg-sage-400 transition-colors;
+        }
+    </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="dark:bg-slate-900 dark:text-slate-300">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
