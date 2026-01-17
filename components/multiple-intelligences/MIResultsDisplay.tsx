@@ -72,7 +72,19 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
     return text;
   }, [topThree, answers]);
 
-  const analysisContent = `Kết quả của bạn cho thấy 3 loại hình trí thông minh nổi trội nhất là: ${topIntelligencesString}.\n\nCụ thể:${evidenceText}\n\nĐiều này cho thấy bạn có tiềm năng lớn trong các lĩnh vực đòi hỏi sự kết hợp giữa các thế mạnh này.`;
+  const analysisContent = `
+Chào **${userData?.fullName || 'bạn'}**,
+
+Dựa trên những chia sẻ chân thành của bạn, PathAI nhận thấy bạn sở hữu một cấu trúc trí thông minh vô cùng thú vị.
+
+Top 3 loại hình trí thông minh nổi bật nhất của bạn là: ${topIntelligencesString}.
+
+**Chi tiết hơn về thế mạnh của bạn:**
+${evidenceText}
+
+💡 **Góc nhìn từ chuyên gia:**
+Sự kết hợp này cho thấy bạn không chỉ có khả năng tư duy sâu sắc mà còn rất nhạy bén trong việc tương tác và cảm nhận. Đây là "bệ phóng" tuyệt vời cho những công việc đòi hỏi sự sáng tạo, thấu cảm và linh hoạt. Hãy tin tưởng vào bản thân, vì tiềm năng của bạn là rất lớn!
+`;
   const systemInstruction = `Bạn là chuyên gia về Thuyết Trí thông minh Đa diện. Phân tích kết quả: ${JSON.stringify(results)}. Đưa ra lời khuyên học tập và nghề nghiệp.`;
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
   const topIntelligencesStringForSearch = topThree.map(r => r.name.split('–')[0].trim()).join(', ');

@@ -90,30 +90,12 @@ const App: React.FC = () => {
   const [loadingUser, setLoadingUser] = useState(true);
 
   // Sync Auth State
-  // Sync Auth State - BYPASS AUTH FOR NOW
+  // Sync Auth State
   useEffect(() => {
-    // Simulate logged in user immediately
-    const tempUser: UserData = {
-      uid: 'user-guest-' + Date.now(),
-      fullName: 'Khách',
-      email: 'guest@pathai.com',
-      birthYear: '2000',
-      gender: 'Khác',
-      location: 'Việt Nam',
-      status: 'Khách tham quan',
-      educationLevel: 'Khác',
-      source: 'Trực tiếp',
-      expectations: 'Tìm hiểu bản thân',
-      avatarUrl: ''
-    };
-
     // Check if we already have a profile in localStorage
     const stored = localStorage.getItem('localUserProfile');
     if (stored) {
       setUserData(JSON.parse(stored));
-    } else {
-      setUserData(tempUser);
-      localStorage.setItem('localUserProfile', JSON.stringify(tempUser));
     }
     setLoadingUser(false);
   }, []);

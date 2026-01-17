@@ -14,7 +14,7 @@ export const usePdfGenerator = (fileName: string) => {
     document.body.classList.add('is-capturing');
 
     // UI update before canvas generation
-    await new Promise(resolve => setTimeout(resolve, 100)); // Increased wait time slightly
+    await new Promise(resolve => setTimeout(resolve, 500)); // Increased wait time for stability
 
     try {
       const element = contentRef.current;
