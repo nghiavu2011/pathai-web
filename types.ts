@@ -230,9 +230,13 @@ export interface UserData {
   gender: string;
   location: string;
   status: string; // Current status (student, employee, etc.)
-  educationLevel: string; // New: Trình độ học vấn
+  educationLevel: string; // Trình độ học vấn
   source: string; // Where did they hear about us
   expectations: string; // What do they want from the app
+  birthOrder?: string; // New: Thứ tự sinh
+  maritalStatus?: string; // New: TÌnh trạng hôn nhân
+  sexualOrientation?: string; // New: Xu hướng tính dục
+  bio?: string; // New: Đôi điều về bản thân
   avatarUrl?: string; // For Gmail avatar simulation
   uid?: string; // Firebase Authentication UID
 }

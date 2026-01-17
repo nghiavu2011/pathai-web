@@ -419,7 +419,6 @@ const App: React.FC = () => {
   }, [goals]);
 
   // Auth Handling
-  // Auth Handling
   const handleLogin = (data: UserData) => {
     setUserData(data);
     localStorage.setItem('localUserProfile', JSON.stringify(data));
@@ -429,6 +428,20 @@ const App: React.FC = () => {
     localStorage.removeItem('localUserProfile');
     window.location.reload(); // Simple reload to reset state
   };
+
+  const completedStages = useMemo(() => {
+    const stage1 = ['holland', 'mi', 'big-five', 'eq', 'context'];
+    const stage2 = ['wheel', 'cdb', 'work-values', 'career-anchors'];
+    const stage3 = ['grit', 'crs', 'gms'];
+
+    return {
+      s1: history.some(h => stage1.includes(h.quizId)),
+      s2: history.some(h => stage2.includes(h.quizId)),
+      s3: history.some(h => stage3.includes(h.quizId))
+    };
+  }, [history]);
+
+  const canShowSynthesis = completedStages.s1 && completedStages.s2 && completedStages.s3;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -627,7 +640,16 @@ const App: React.FC = () => {
 
       case 'home':
       default:
-        return <HomePage onSelectQuiz={handleSelectQuiz} onOpenGuide={() => setGuideModalOpen(true)} onOpenQuizInfo={handleOpenQuizInfo} />;
+        return (
+          <HomePage
+            onSelectQuiz={handleSelectQuiz}
+            onOpenGuide={() => setGuideModalOpen(true)}
+            onOpenQuizInfo={handleOpenQuizInfo}
+            history={history}
+            canShowSynthesis={canShowSynthesis}
+            userData={userData}
+          />
+        );
     }
   };
 

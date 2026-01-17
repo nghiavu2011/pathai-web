@@ -14,9 +14,13 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({ userData }) => 
     { label: 'Email', value: userData.email },
     { label: 'Năm sinh', value: userData.birthYear },
     { label: 'Giới tính', value: userData.gender },
+    { label: 'Xu hướng', value: userData.sexualOrientation },
     { label: 'Khu vực', value: userData.location },
     { label: 'Học vấn', value: userData.educationLevel },
+    { label: 'Gia đình', value: userData.birthOrder },
+    { label: 'Tình trạng', value: userData.maritalStatus },
     { label: 'Trạng thái', value: userData.status },
+    { label: 'Về bản thân', value: userData.bio, fullWidth: true },
     { label: 'Mong muốn', value: userData.expectations, fullWidth: true },
   ];
 
@@ -24,7 +28,7 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({ userData }) => 
     <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700">
       <h3 className="text-xl font-bold mb-6 text-sage-800 dark:text-sage-300 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
         </svg>
         Hồ sơ cá nhân
       </h3>

@@ -64,28 +64,47 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
       });
 
       if (highTags.length > 0) {
-        // Pick up to 2 random traits to cite
-        const selectedz = highTags.slice(0, 2).join(", ");
-        text += `\n- Với **${result.name.split('–')[0]}**: Bạn thể hiện rõ qua việc ${selectedz}.`;
+        // Pick up to 2 traits
+        const selectedValues = highTags.slice(0, 2).join(", ");
+        text += `\n- Với **${result.name.split('–')[0]}**: Một phần con người bạn bộc lộ rất tự nhiên qua việc ${selectedValues}.`;
       }
     });
     return text;
   }, [topThree, answers]);
 
+  const profileSummary = useMemo(() => {
+    if (!userData) return "";
+    return `
+Bối cảnh cá nhân:
+- Gia đình: Là ${userData.birthOrder || 'con trong gia đình'}, tình trạng ${userData.maritalStatus || 'độc thân'}.
+- Xu hướng & Bản dạng: ${userData.gender} (${userData.sexualOrientation || 'kín'}).
+- Trạng thái: ${userData.status}, sống tại ${userData.location}.
+- Câu chuyện bản thân: "${userData.bio || 'Chưa chia sẻ'}"
+- Mong đợi: ${userData.expectations}
+`.trim();
+  }, [userData]);
+
   const analysisContent = `
-Chào **${userData?.fullName || 'bạn'}**,
+Chào **${userData?.fullName || 'bạn'}**, 
 
-Dựa trên những chia sẻ chân thành của bạn, PathAI nhận thấy bạn sở hữu một cấu trúc trí thông minh vô cùng thú vị.
+Tôi đã lắng nghe tâm tư và quan sát những chỉ số của bạn. Với tư cách là một người đồng hành trong hành trình thấu hiểu, tôi nhận thấy ở bạn một nội lực rất đáng trân trọng.
 
-Top 3 loại hình trí thông minh nổi bật nhất của bạn là: ${topIntelligencesString}.
+Bạn sở hữu 3 loại hình trí thông minh nổi trội: ${topIntelligencesString}.
 
-**Chi tiết hơn về thế mạnh của bạn:**
+**Những "tín hiệu" từ nội tâm bạn:**
 ${evidenceText}
 
-💡 **Góc nhìn từ chuyên gia:**
-Sự kết hợp này cho thấy bạn không chỉ có khả năng tư duy sâu sắc mà còn rất nhạy bén trong việc tương tác và cảm nhận. Đây là "bệ phóng" tuyệt vời cho những công việc đòi hỏi sự sáng tạo, thấu cảm và linh hoạt. Hãy tin tưởng vào bản thân, vì tiềm năng của bạn là rất lớn!
+🚀 **Lời nhắn nhủ từ PathAI:**
+Dựa trên bối cảnh ${userData?.status?.toLowerCase()} và những mong muốn về *"${userData?.expectations}"*, tôi tin rằng sự kết hợp giữa các thế mạnh này sẽ giúp bạn vượt qua những tự ti hay rào cản hiện tại. Đừng quên rằng mỗi chặng đường bạn đi đều tích lũy thêm những giá trị quý giá. Hãy vững tin, vì bạn có đủ nguồn lực để chạm đến phiên bản hoàn hảo nhất của chính mình!
 `;
-  const systemInstruction = `Bạn là chuyên gia về Thuyết Trí thông minh Đa diện. Phân tích kết quả: ${JSON.stringify(results)}. Đưa ra lời khuyên học tập và nghề nghiệp.`;
+
+  const systemInstruction = `
+Bạn là một Chuyên gia Tâm lý học cao cấp và người chữa lành (Healer), có khả năng thấu cảm sâu sắc.
+Hãy phân tích kết quả Multiple Intelligences: ${JSON.stringify(results)}
+Dựa trên hồ sơ người dùng: ${profileSummary}
+
+Mục tiêu: Đưa ra lời khuyên chuyên nghiệp, chân thành, sát đáng. Tập trung vào việc chữa lành, hướng con người vươn lên, vượt qua các rào cản cá nhân và tự ti. Sử dụng ngôn từ tinh tế, nhân văn, mở ra "chân trời mới" dựa trên bối cảnh sống riêng biệt của họ (như thứ tự sinh, tình trạng hôn nhân, câu chuyện bản thân).
+`;
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
   const topIntelligencesStringForSearch = topThree.map(r => r.name.split('–')[0].trim()).join(', ');
   const newsQuery = `cách phát triển và ứng dụng trí thông minh ${topIntelligencesStringForSearch} trong sự nghiệp`;
