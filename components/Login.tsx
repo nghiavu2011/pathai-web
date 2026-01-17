@@ -10,7 +10,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-    const [step, setStep] = useState(0); // 0: Google Login, 1: Personal Info, 2: Survey
+    const [step, setStep] = useState(1); // Default to Personal Info (Step 1)
     const [loading, setLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
 
@@ -31,40 +31,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // Handle Google Login
-    const handleGoogleLogin = async () => {
-        setLoading(true);
-        setAuthError(null);
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const user = result.user;
+    // Google Login Removed
 
-            // Check if user exists in Firestore
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                // User exists, log them in directly
-                const userData = userSnap.data() as UserData;
-                onLogin({ ...userData, uid: user.uid }); // Ensure UID is present
-            } else {
-                // New user, prefill data and move to registration
-                setFormData(prev => ({
-                    ...prev,
-                    uid: user.uid,
-                    email: user.email || '',
-                    fullName: user.displayName || '',
-                    avatarUrl: user.photoURL || ''
-                }));
-                setStep(1);
-            }
-        } catch (error: any) {
-            console.error("Login Error:", error);
-            setAuthError("Đăng nhập thất bại. Vui lòng thử lại. " + (error.message || ""));
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -107,67 +75,21 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const saveUserProfile = async () => {
         setLoading(true);
         try {
-            if (!formData.uid) throw new Error("Missing UID");
-            const userRef = doc(db, "users", formData.uid);
-            await setDoc(userRef, formData);
-            onLogin(formData);
+            // Generate a random guest ID if not present
+            const finalData = { ...formData, uid: formData.uid || `guest-${Date.now()}` };
+
+            // Save to localStorage directly (Offline Mode)
+            localStorage.setItem('localUserProfile', JSON.stringify(finalData));
+            onLogin(finalData);
         } catch (error: any) {
             console.error("Save Profile Error:", error);
-            setAuthError("Không thể lưu hồ sơ. Vui lòng thử lại.");
+            // setAuthError("Không thể lưu hồ sơ. Vui lòng thử lại."); // No auth error needed for local
         } finally {
             setLoading(false);
         }
     };
 
-    const renderGoogleButton = () => (
-        <div className="text-center animate-fade-in">
-            <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6">
-                <svg viewBox="0 0 24 24" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
-                    <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                        <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                        <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                        <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.734 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
-                        <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
-                    </g>
-                </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Đăng nhập với Google</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-xs mx-auto text-sm">
-                Kết nối tài khoản để lưu trữ hồ sơ, lịch sử trắc nghiệm và nhận tư vấn AI được cá nhân hóa.
-            </p>
 
-            {authError && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span className="block sm:inline text-sm">{authError}</span>
-                </div>
-            )}
-
-            <button
-                onClick={handleGoogleLogin}
-                disabled={loading}
-                className="w-full max-w-xs py-3 px-6 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-3 group mx-auto"
-            >
-                {loading ? (
-                    <div className="w-5 h-5 border-2 border-slate-400 border-t-blue-500 rounded-full animate-spin"></div>
-                ) : (
-                    <>
-                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                            <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.734 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
-                                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
-                            </g>
-                        </svg>
-                        <span className="font-semibold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">Tiếp tục với Google</span>
-                    </>
-                )}
-            </button>
-            <p className="mt-6 text-xs text-slate-400">
-                Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của PathAI.
-            </p>
-        </div>
-    );
 
     const renderStep1 = () => (
         <div className="animate-slide-up space-y-5">
@@ -297,39 +219,34 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-slate-700">
 
                     {/* Logo Header */}
-                    {step === 0 && (
-                        <div className="flex flex-col items-center mb-8">
-                            <div className="w-16 h-16 bg-sage-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sage-200 mb-4 transform rotate-3">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M2 17L12 22L22 17" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M2 12L12 17L22 12" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </div>
-                            <h1 className="text-3xl font-display font-bold text-sage-900 dark:text-slate-100">PathAI</h1>
-                            <p className="text-sage-500 dark:text-slate-400 text-sm font-medium tracking-widest uppercase mt-1">Hành trình thấu hiểu bản thân</p>
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="w-16 h-16 bg-sage-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sage-200 mb-4 transform rotate-3">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M2 17L12 22L22 17" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M2 12L12 17L22 12" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
                         </div>
-                    )}
+                        <h1 className="text-3xl font-display font-bold text-sage-900 dark:text-slate-100">PathAI</h1>
+                        <p className="text-sage-500 dark:text-slate-400 text-sm font-medium tracking-widest uppercase mt-1">Hành trình thấu hiểu bản thân</p>
+                    </div>
 
                     {/* Progress Bar for Steps 1 & 2 */}
-                    {step > 0 && (
-                        <div className="mb-8">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
-                                <span className={step >= 1 ? "text-sage-600" : ""}>Hồ sơ</span>
-                                <span className={step >= 2 ? "text-sage-600" : ""}>Nhu cầu</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-sage-500 transition-all duration-500 ease-out"
-                                    style={{ width: step === 1 ? '50%' : '100%' }}
-                                ></div>
-                            </div>
+                    <div className="mb-8">
+                        <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
+                            <span className={step >= 1 ? "text-sage-600" : ""}>Hồ sơ</span>
+                            <span className={step >= 2 ? "text-sage-600" : ""}>Nhu cầu</span>
                         </div>
-                    )}
+                        <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-sage-500 transition-all duration-500 ease-out"
+                                style={{ width: step === 1 ? '50%' : '100%' }}
+                            ></div>
+                        </div>
+                    </div>
 
                     {/* Content Render */}
                     <div className="min-h-[300px]">
-                        {step === 0 && renderGoogleButton()}
                         {step === 1 && renderStep1()}
                         {step === 2 && renderStep2()}
                     </div>

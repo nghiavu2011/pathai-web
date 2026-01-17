@@ -17,11 +17,10 @@ const RatingScale: React.FC<RatingScaleProps> = ({ options, startLabel, endLabel
             key={value}
             type="button"
             onClick={() => onChange(value)}
-            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-200 transform focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
-              selectedValue === value
-                ? 'bg-primary-blue text-white border-primary-blue scale-110 shadow-lg'
-                : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 text-slate-600 dark:text-slate-300 hover:border-primary-blue hover:text-primary-blue dark:hover:border-primary-blue dark:hover:text-primary-blue'
-            }`}
+            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-200 transform focus:outline-none focus:ring-4 focus:ring-opacity-50 ${selectedValue === value
+                ? 'bg-primary-blue text-white border-primary-blue scale-125 shadow-xl ring-4 ring-blue-300 dark:ring-blue-700/50 z-10'
+                : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 text-slate-600 dark:text-slate-300 hover:border-primary-blue hover:text-primary-blue dark:hover:border-primary-blue dark:hover:text-primary-blue hover:scale-110'
+              }`}
             aria-pressed={selectedValue === value}
             aria-label={`Chọn mức độ ${value}`}
           >

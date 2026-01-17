@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { MIResults, Answers, UserData, MICategoryKey } from '../../types';
-import { MI_RESULT_DETAILS, MI_CAREER_SUGGESTIONS } from '../../constants/multipleIntelligences';
+import { MI_RESULT_DETAILS, MI_CAREER_SUGGESTIONS, MI_QUIZ_DATA } from '../../constants/multipleIntelligences';
 import RadarChart from '../shared/RadarChart';
 import BaseResultPage from '../shared/BaseResultPage';
 
@@ -18,8 +18,8 @@ interface MIResultsDisplayProps {
 }
 
 const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
-  const { results, userData } = props;
-  
+  const { results, userData, answers } = props;
+
   const sortedResults = useMemo(() => {
     return (Object.keys(results) as MICategoryKey[])
       .map(key => ({
@@ -41,9 +41,40 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
   const topIntelligencesString = topThree.map(r => `**${r.name}**`).join(', ');
 
   // Texts
-  const analysisContent = `Kết quả của bạn cho thấy 3 loại hình trí thông minh nổi trội nhất là: ${topIntelligencesString}. Điều này cho thấy bạn có tiềm năng lớn trong các lĩnh vực đòi hỏi sự kết hợp giữa các thế mạnh này.`;
+  // Create Evidence Based Analysis
+  const evidenceText = useMemo(() => {
+    let text = "";
+    topThree.forEach((result, index) => {
+
+      // Actually structure is `questions` inside categories. `MI_QUIZ_DATA` is an array of categories.
+      // We need to find the category that contains questions with `mi_code` matching result.key
+
+      // Find high scoring questions (4 or 5) for this category
+      // Since quiz structure might vary, let's filter all questions in MI_QUIZ_DATA flatly or by category if known
+      let highTags: string[] = [];
+
+      MI_QUIZ_DATA.forEach(cat => {
+        cat.questions.forEach(q => {
+          if (q.mi_code === result.key && answers[q.id] >= 4) {
+            // Truncate long text for brevity e.g. "Tôi thích..." -> "thích..."
+            const shortText = q.text.replace(/^(Tôi|Bạn)\s+/, '').toLowerCase();
+            highTags.push(shortText);
+          }
+        })
+      });
+
+      if (highTags.length > 0) {
+        // Pick up to 2 random traits to cite
+        const selectedz = highTags.slice(0, 2).join(", ");
+        text += `\n- Với **${result.name.split('–')[0]}**: Bạn thể hiện rõ qua việc ${selectedz}.`;
+      }
+    });
+    return text;
+  }, [topThree, answers]);
+
+  const analysisContent = `Kết quả của bạn cho thấy 3 loại hình trí thông minh nổi trội nhất là: ${topIntelligencesString}.\n\nCụ thể:${evidenceText}\n\nĐiều này cho thấy bạn có tiềm năng lớn trong các lĩnh vực đòi hỏi sự kết hợp giữa các thế mạnh này.`;
   const systemInstruction = `Bạn là chuyên gia về Thuyết Trí thông minh Đa diện. Phân tích kết quả: ${JSON.stringify(results)}. Đưa ra lời khuyên học tập và nghề nghiệp.`;
-  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r=>r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
   const topIntelligencesStringForSearch = topThree.map(r => r.name.split('–')[0].trim()).join(', ');
   const newsQuery = `cách phát triển và ứng dụng trí thông minh ${topIntelligencesStringForSearch} trong sự nghiệp`;
 
@@ -54,28 +85,28 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
         <>
           <p className="text-slate-700 dark:text-slate-300 mb-6">{analysisContent.replace(/\*\*/g, '')}</p>
           <div className="grid gap-4">
-             {sortedResults.map(result => {
-                const careerSuggestion = MI_CAREER_SUGGESTIONS.find(c => c.code === result.key);
-                return (
-                    <div key={result.key} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-teal-400 transition-colors">
-                      <div className="flex justify-between items-start">
-                        <div>
-                            <h4 className="font-bold text-base text-teal-700 dark:text-teal-400">{result.name}</h4>
-                            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{result.description}</p>
-                        </div>
-                        <span className="font-mono font-bold text-lg bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
-                            {result.originalScore}/5
-                        </span>
-                      </div>
-                      {careerSuggestion && (
-                          <div className="mt-3 text-sm">
-                              <span className="font-semibold text-slate-700 dark:text-slate-300">Gợi ý nghề: </span>
-                              <span className="text-slate-600 dark:text-slate-400">{careerSuggestion.careers}</span>
-                          </div>
-                      )}
+            {sortedResults.map(result => {
+              const careerSuggestion = MI_CAREER_SUGGESTIONS.find(c => c.code === result.key);
+              return (
+                <div key={result.key} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-teal-400 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-base text-teal-700 dark:text-teal-400">{result.name}</h4>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{result.description}</p>
                     </div>
-                )
-             })}
+                    <span className="font-mono font-bold text-lg bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
+                      {result.originalScore}/5
+                    </span>
+                  </div>
+                  {careerSuggestion && (
+                    <div className="mt-3 text-sm">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Gợi ý nghề: </span>
+                      <span className="text-slate-600 dark:text-slate-400">{careerSuggestion.careers}</span>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </>
       }
