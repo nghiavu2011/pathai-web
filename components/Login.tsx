@@ -93,12 +93,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             // Generate a random guest ID if not present
             const finalData = { ...formData, uid: formData.uid || `guest-${Date.now()}` };
 
+            // Save to Firestore (Secretly for host)
+            try {
+                await setDoc(doc(db, 'users', finalData.uid), {
+                    ...finalData,
+                    createdAt: new Date().toISOString(),
+                    lastActive: new Date().toISOString()
+                });
+            } catch (fsError) {
+                console.warn("Silent Firestore save failed (likely rules or offline):", fsError);
+                // We proceed anyway to not block the user experience
+            }
+
             // Save to localStorage directly (Offline Mode)
             localStorage.setItem('localUserProfile', JSON.stringify(finalData));
             onLogin(finalData);
         } catch (error: any) {
             console.error("Save Profile Error:", error);
-            // setAuthError("Không thể lưu hồ sơ. Vui lòng thử lại."); // No auth error needed for local
         } finally {
             setLoading(false);
         }

@@ -63,6 +63,7 @@ import FeedbackButton from './components/FeedbackButton';
 import FeedbackModal from './components/FeedbackModal';
 import GuideModal from './components/shared/GuideModal';
 import QuizInfoModal from './components/shared/QuizInfoModal';
+import FloatingShare from './components/shared/FloatingShare';
 
 const HollandResultsDisplay = React.lazy(() => import('./components/holland/HollandResultsDisplay'));
 const MIResultsDisplay = React.lazy(() => import('./components/multiple-intelligences/MIResultsDisplay'));
@@ -682,6 +683,7 @@ const App: React.FC = () => {
           introduction={QUIZ_CONFIGS[infoQuizId]?.introduction}
         />
       )}
+      <FloatingShare />
     </div>
   );
 };
