@@ -87,26 +87,31 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         }
     };
 
-    const saveUserProfile = async () => {
+    const saveUserProfile = () => {
         setLoading(true);
         try {
             // Generate a random guest ID if not present
             const finalData = { ...formData, uid: formData.uid || `guest-${Date.now()}` };
 
-            // Save to Firestore (Secretly for host)
+            // Save to localStorage immediately (Offline-first)
+            localStorage.setItem('localUserProfile', JSON.stringify(finalData));
+
+            // Optional background sync to Firestore without blocking the user
             try {
-                await setDoc(doc(db, 'users', finalData.uid), {
-                    ...finalData,
-                    createdAt: new Date().toISOString(),
-                    lastActive: new Date().toISOString()
-                });
-            } catch (fsError) {
-                console.warn("Silent Firestore save failed (likely rules or offline):", fsError);
-                // We proceed anyway to not block the user experience
+                if (db) {
+                    setDoc(doc(db, 'users', finalData.uid), {
+                        ...finalData,
+                        createdAt: new Date().toISOString(),
+                        lastActive: new Date().toISOString()
+                    }).catch(fsError => {
+                        console.warn("Silent Firestore sync skipped/failed:", fsError);
+                    });
+                }
+            } catch (syncErr) {
+                console.warn("Background sync error:", syncErr);
             }
 
-            // Save to localStorage directly (Offline Mode)
-            localStorage.setItem('localUserProfile', JSON.stringify(finalData));
+            // Immediately complete login
             onLogin(finalData);
         } catch (error: any) {
             console.error("Save Profile Error:", error);
