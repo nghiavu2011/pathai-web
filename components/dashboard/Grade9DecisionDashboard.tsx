@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { QuizHistoryEntry, CategoryKey } from '../../types';
 import { CAREER_FAMILIES } from '../../data/careerFamilies';
 import { THPT_SUBJECTS } from '../../data/subjects';
@@ -7,6 +7,10 @@ import { generateSubjectPlan } from '../../data/engines/subjectPlannerEngine';
 import { assessDoorClosingRisk, calculateOptionalityScore } from '../../data/engines/doorClosingRiskEngine';
 import { generateRoadmap } from '../../data/engines/roadmapEngine';
 import { GRADE_PHASES, Grade } from '../../data/types/student';
+import { StudentScoreProfile } from '../../data/types/admissions';
+import AdmissionsExplorer from './AdmissionsExplorer';
+import ExamStrategyView from './ExamStrategyView';
+import ScenarioSimulatorView from './ScenarioSimulatorView';
 
 interface Grade9DecisionDashboardProps {
   history: QuizHistoryEntry[];
@@ -20,7 +24,9 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
   onSelectQuiz
 }) => {
   const [selectedGrade, setSelectedGrade] = useState<Grade>(9);
-  const [activeTab, setActiveTab] = useState<'hypotheses' | 'planner' | 'door_closing' | 'roadmap'>('hypotheses');
+  const [activeTab, setActiveTab] = useState<
+    'hypotheses' | 'planner' | 'door_closing' | 'universities' | 'exam_strategy' | 'scenarios' | 'roadmap'
+  >('hypotheses');
   
   // Find latest Holland result or provide an interactive baseline
   const hollandEntry = history.find(h => h.quizId === 'holland');
@@ -37,6 +43,26 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
       [CategoryKey.E]: 12,
       [CategoryKey.C]: 10
     };
+  });
+
+  // Score Profile for admissions
+  const [scoreProfile] = useState<StudentScoreProfile>({
+    thptScores: {
+      toan: 8.5,
+      ly: 8.0,
+      hoa: 7.5,
+      van: 7.5,
+      anh: 8.0,
+      sinh: 7.0
+    },
+    tsaScore: 72,
+    hsaScore: 98,
+    dgnlHcmScore: 820,
+    satScore: 1350,
+    ieltsScore: 6.5,
+    gpa10: 8.4,
+    gpa11: 8.6,
+    gpa12: 8.8
   });
 
   // Calculate Career Hypotheses
@@ -143,7 +169,37 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
           }`}
         >
-          3. Mô phỏng Đóng/Mở cửa cơ hội
+          3. Đóng/Mở cơ hội
+        </button>
+        <button
+          onClick={() => setActiveTab('universities')}
+          className={`pb-4 px-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'universities'
+              ? 'border-sage-600 text-sage-600 dark:text-sage-400 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
+          }`}
+        >
+          🎓 4. Khám phá Tuyển sinh
+        </button>
+        <button
+          onClick={() => setActiveTab('exam_strategy')}
+          className={`pb-4 px-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'exam_strategy'
+              ? 'border-sage-600 text-sage-600 dark:text-sage-400 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
+          }`}
+        >
+          🎯 5. Chiến lược Thi (ROI)
+        </button>
+        <button
+          onClick={() => setActiveTab('scenarios')}
+          className={`pb-4 px-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'scenarios'
+              ? 'border-sage-600 text-sage-600 dark:text-sage-400 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
+          }`}
+        >
+          ⚡ 6. Mô phỏng Điểm
         </button>
         <button
           onClick={() => setActiveTab('roadmap')}
@@ -153,7 +209,7 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
           }`}
         >
-          4. Kế hoạch hành động (Roadmap)
+          7. Roadmap
         </button>
       </div>
 
@@ -382,7 +438,31 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
         </div>
       )}
 
-      {/* Tab 4: Roadmap */}
+      {/* Tab 4: Universities Explorer */}
+      {activeTab === 'universities' && (
+        <AdmissionsExplorer
+          targetFamilyIds={targetFamilyIds}
+          scoreProfile={scoreProfile}
+        />
+      )}
+
+      {/* Tab 5: Exam Strategy */}
+      {activeTab === 'exam_strategy' && (
+        <ExamStrategyView
+          targetFamilyIds={targetFamilyIds}
+          scoreProfile={scoreProfile}
+        />
+      )}
+
+      {/* Tab 6: Scenario Simulator */}
+      {activeTab === 'scenarios' && (
+        <ScenarioSimulatorView
+          targetFamilyIds={targetFamilyIds}
+          scoreProfile={scoreProfile}
+        />
+      )}
+
+      {/* Tab 7: Roadmap */}
       {activeTab === 'roadmap' && (
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
