@@ -1,5 +1,6 @@
 import React from 'react';
 import { Introduction } from '../../types';
+import AssessmentDisclaimer from './AssessmentDisclaimer';
 
 interface QuizIntroductionProps extends Introduction {
   onNext: () => void;
@@ -62,6 +63,7 @@ const QuizIntroduction: React.FC<QuizIntroductionProps> = ({ title, main_descrip
         </div>
       </div>
 
+      <AssessmentDisclaimer />
       <div className="text-center pt-8 space-y-6">
         <button
           onClick={onNext}
