@@ -12,10 +12,11 @@ interface HeaderProps {
   userData: UserData | null;
   onViewHistory: () => void;
   onViewGoals: () => void;
+  onOpenDecisionDashboard?: () => void;
   onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme, showProgress, onGoHome, userData, onViewHistory, onViewGoals, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme, showProgress, onGoHome, userData, onViewHistory, onViewGoals, onOpenDecisionDashboard, onLogout }) => {
   return (
     <header className="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-20 transition-colors duration-300">
       <div className="container mx-auto px-4 py-4">
@@ -41,6 +42,17 @@ const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme,
             </p>
              {!showProgress && (
               <>
+                {onOpenDecisionDashboard && (
+                  <button
+                    onClick={onOpenDecisionDashboard}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-sage-50 text-sage-700 hover:bg-sage-100 dark:bg-slate-700 dark:text-sage-300 transition-colors"
+                    aria-label="Bản đồ Định hướng"
+                    title="Bản đồ Định hướng Lớp 9-12"
+                  >
+                    <span>🧭</span>
+                    <span className="hidden xl:inline">Định hướng 9-12</span>
+                  </button>
+                )}
                 <button 
                   onClick={onViewGoals}
                   className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 transition-colors"

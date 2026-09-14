@@ -65,6 +65,7 @@ import GuideModal from './components/shared/GuideModal';
 import QuizInfoModal from './components/shared/QuizInfoModal';
 import FloatingShare from './components/shared/FloatingShare';
 import PrivacyConsent from './components/PrivacyConsent';
+import Grade9DecisionDashboard from './components/dashboard/Grade9DecisionDashboard';
 
 const HollandResultsDisplay = React.lazy(() => import('./components/holland/HollandResultsDisplay'));
 const MIResultsDisplay = React.lazy(() => import('./components/multiple-intelligences/MIResultsDisplay'));
@@ -79,7 +80,7 @@ const WheelOfLifeResultsDisplay = React.lazy(() => import('./components/wheel-of
 const BigFiveResultsDisplay = React.lazy(() => import('./components/big-five/BigFiveResultsDisplay'));
 const EQResultsDisplay = React.lazy(() => import('./components/eq/EQResultsDisplay'));
 
-type View = 'home' | 'quiz' | 'results' | 'history' | 'goals';
+type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard';
 
 interface QuizState {
   currentStep: number;
@@ -518,6 +519,7 @@ const App: React.FC = () => {
 
   const handleViewHistory = () => setCurrentView('history');
   const handleViewGoals = () => setCurrentView('goals');
+  const handleViewDecisionDashboard = () => setCurrentView('decision-dashboard');
 
   const handleViewResultFromHistory = (entry: QuizHistoryEntry) => {
     resetQuiz();
@@ -640,6 +642,15 @@ const App: React.FC = () => {
       case 'goals':
         return <GoalsPage goals={goals} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onGoHome={handleGoHome} />;
 
+      case 'decision-dashboard':
+        return (
+          <Grade9DecisionDashboard
+            history={history}
+            onGoHome={handleGoHome}
+            onSelectQuiz={handleSelectQuiz}
+          />
+        );
+
       case 'home':
       default:
         return (
@@ -647,6 +658,7 @@ const App: React.FC = () => {
             onSelectQuiz={handleSelectQuiz}
             onOpenGuide={() => setGuideModalOpen(true)}
             onOpenQuizInfo={handleOpenQuizInfo}
+            onOpenDecisionDashboard={handleViewDecisionDashboard}
             history={history}
             canShowSynthesis={canShowSynthesis}
             userData={userData}
@@ -667,6 +679,7 @@ const App: React.FC = () => {
         userData={userData}
         onViewHistory={handleViewHistory}
         onViewGoals={handleViewGoals}
+        onOpenDecisionDashboard={handleViewDecisionDashboard}
         onLogout={handleLogout}
       />
       <main className="flex-grow container mx-auto px-4 pt-32 pb-12 md:pt-44">

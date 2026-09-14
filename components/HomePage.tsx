@@ -8,6 +8,7 @@ interface HomePageProps {
     onSelectQuiz: (id: string) => void;
     onOpenGuide: () => void;
     onOpenQuizInfo: (id: string) => void;
+    onOpenDecisionDashboard?: () => void;
     history?: QuizHistoryEntry[];
     canShowSynthesis?: boolean;
     userData?: UserData | null;
@@ -17,6 +18,7 @@ const HomePage: React.FC<HomePageProps> = ({
     onSelectQuiz,
     onOpenGuide,
     onOpenQuizInfo,
+    onOpenDecisionDashboard,
     history = [],
     canShowSynthesis = false,
     userData = null
@@ -67,18 +69,26 @@ const HomePage: React.FC<HomePageProps> = ({
                             PathAI là không gian an toàn để bạn khám phá bản thân, lắng nghe nội tâm và từng bước xây dựng con đường sự nghiệp vững chắc.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            {onOpenDecisionDashboard && (
+                                <button
+                                    onClick={onOpenDecisionDashboard}
+                                    className="min-w-[220px] px-8 py-4 bg-accent hover:bg-accent-dark text-slate-900 font-bold rounded-full transition-all transform hover:-translate-y-1 shadow-lg shadow-black/20 text-sm tracking-widest uppercase flex items-center justify-center gap-2"
+                                >
+                                    <span>🧭</span> Bản đồ Định hướng
+                                </button>
+                            )}
                             <button
                                 onClick={() => scrollToSection('journey-start')}
-                                className="min-w-[200px] px-8 py-4 bg-white text-sage-900 rounded-full font-bold hover:bg-cream-50 transition-all transform hover:-translate-y-1 shadow-lg shadow-black/20 text-sm tracking-widest uppercase"
+                                className="min-w-[180px] px-8 py-4 bg-white text-sage-900 rounded-full font-bold hover:bg-cream-50 transition-all transform hover:-translate-y-1 shadow-lg shadow-black/20 text-sm tracking-widest uppercase"
                             >
-                                Bắt đầu ngay
+                                Trắc nghiệm
                             </button>
                             <button
                                 onClick={onOpenGuide}
-                                className="min-w-[200px] px-8 py-4 bg-transparent border border-white/50 text-white rounded-full font-bold hover:bg-white/10 transition-all backdrop-blur-sm text-sm tracking-widest uppercase"
+                                className="min-w-[160px] px-6 py-4 bg-transparent border border-white/50 text-white rounded-full font-bold hover:bg-white/10 transition-all backdrop-blur-sm text-sm tracking-widest uppercase"
                             >
-                                Tìm hiểu thêm
+                                Hướng dẫn
                             </button>
                         </div>
                     </div>
@@ -146,6 +156,35 @@ const HomePage: React.FC<HomePageProps> = ({
                     </div>
                 </div>
             </section>
+
+            {/* --- DECISION SYSTEM BANNER (GRADE 9-12) --- */}
+            {onOpenDecisionDashboard && (
+                <section className="px-4 pb-16">
+                    <div className="container mx-auto max-w-6xl">
+                        <div className="bg-gradient-to-r from-sage-800 via-sage-700 to-slate-800 text-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
+                            <div className="relative z-10 max-w-2xl space-y-3">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold text-amber-200 tracking-wide uppercase">
+                                    <span>🧭 PathAI Decision System (Lớp 9–12)</span>
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-display font-bold text-white leading-tight">
+                                    Bản đồ Định hướng Tương lai & Chọn môn Lớp 10
+                                </h2>
+                                <p className="text-sage-100 text-base font-light leading-relaxed">
+                                    Không dừng lại ở bài trắc nghiệm, PathAI hỗ trợ bạn xây dựng giả thuyết nghề nghiệp, lập kế hoạch chọn tổ hợp môn THPT và mô phỏng rủi ro đóng/mở cánh cửa tương lai.
+                                </p>
+                            </div>
+                            <div className="relative z-10 shrink-0">
+                                <button
+                                    onClick={onOpenDecisionDashboard}
+                                    className="px-8 py-4 bg-white text-sage-900 hover:bg-amber-50 font-bold rounded-full text-sm uppercase tracking-wider shadow-lg transform hover:-translate-y-1 transition-all"
+                                >
+                                    Mở Bản đồ Ngay →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* --- SECTOR 1: SELF-UNDERSTANDING (White Background) --- */}
             <section id="journey-1" className="py-32 bg-white dark:bg-slate-900">
