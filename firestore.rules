@@ -1,27 +1,47 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is signed in
+    // Default: deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper: check if user is authenticated
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Helper function to check if user is accessing their own data
+    // Helper: check if user owns the document
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Users collection: Users can only read/write their own profile
+    // Helper: limit document size (basic validation)
+    function isValidSize() {
+      return request.resource.data.keys().size() < 50;
+    }
+
+    // Users collection: strict ownership
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize();
       
-      // Subcollections (history, goals) inherit strict ownership checks
       match /history/{historyId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isValidSize();
       }
       match /goals/{goalId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isValidSize();
       }
+    }
+
+    // Feedback: anyone can submit, no one can read (admin only via console)
+    match /feedback/{feedbackId} {
+      allow create: if request.resource.data.keys().size() < 10
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() < 2000;
+      allow read, update, delete: if false;
     }
   }
 }
