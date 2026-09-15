@@ -4,3 +4,4 @@ export * from './career';
 export * from './assessment';
 export * from './confidence';
 export * from './admissions';
+export * from './archetypes';

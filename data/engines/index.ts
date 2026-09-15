@@ -5,3 +5,4 @@ export * from './roadmapEngine';
 export * from './universityMatchingEngine';
 export * from './examStrategyEngine';
 export * from './scenarioSimulatorEngine';
+export * from './archetypeEngine';

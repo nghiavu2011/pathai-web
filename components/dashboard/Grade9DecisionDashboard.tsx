@@ -11,6 +11,7 @@ import { StudentScoreProfile } from '../../data/types/admissions';
 import AdmissionsExplorer from './AdmissionsExplorer';
 import ExamStrategyView from './ExamStrategyView';
 import ScenarioSimulatorView from './ScenarioSimulatorView';
+import CulturalArchetypeView from './CulturalArchetypeView';
 
 interface Grade9DecisionDashboardProps {
   history: QuizHistoryEntry[];
@@ -25,7 +26,7 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
 }) => {
   const [selectedGrade, setSelectedGrade] = useState<Grade>(9);
   const [activeTab, setActiveTab] = useState<
-    'hypotheses' | 'planner' | 'door_closing' | 'universities' | 'exam_strategy' | 'scenarios' | 'roadmap'
+    'hypotheses' | 'planner' | 'door_closing' | 'universities' | 'exam_strategy' | 'scenarios' | 'archetypes' | 'roadmap'
   >('hypotheses');
   
   // Find latest Holland result or provide an interactive baseline
@@ -202,6 +203,16 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
           ⚡ 6. Mô phỏng Điểm
         </button>
         <button
+          onClick={() => setActiveTab('archetypes')}
+          className={`pb-4 px-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'archetypes'
+              ? 'border-amber-600 text-amber-600 dark:text-amber-400 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
+          }`}
+        >
+          🏛️ 7. Khí chất & Bản sắc
+        </button>
+        <button
           onClick={() => setActiveTab('roadmap')}
           className={`pb-4 px-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'roadmap'
@@ -209,7 +220,7 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'
           }`}
         >
-          7. Roadmap
+          8. Roadmap
         </button>
       </div>
 
@@ -462,7 +473,14 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
         />
       )}
 
-      {/* Tab 7: Roadmap */}
+      {/* Tab 7: Eastern Archetypes & Temperament */}
+      {activeTab === 'archetypes' && (
+        <CulturalArchetypeView
+          riasecScores={customRiasec}
+        />
+      )}
+
+      {/* Tab 8: Roadmap */}
       {activeTab === 'roadmap' && (
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
