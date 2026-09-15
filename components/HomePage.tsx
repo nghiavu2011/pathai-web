@@ -40,7 +40,7 @@ const HomePage: React.FC<HomePageProps> = ({
     return (
         <div className="flex flex-col w-full -mt-32 md:-mt-44">
             {/* --- HERO SECTION --- */}
-            <section className="relative w-full h-[90vh] min-h-[650px] flex items-center justify-center overflow-hidden">
+            <section className="relative w-full min-h-[800px] md:min-h-[880px] flex items-center justify-center overflow-hidden pb-36">
                 {/* Animated Hero Slider */}
                 <HeroSlider
                     images={[
@@ -53,7 +53,7 @@ const HomePage: React.FC<HomePageProps> = ({
                 />
 
                 {/* Hero Content */}
-                <div className="relative z-10 container mx-auto px-6 md:px-12 pt-20">
+                <div className="relative z-10 container mx-auto px-6 md:px-12 pt-20 pb-16">
                     <div className="max-w-4xl mx-auto text-center animate-slow-fade">
                         <span className="inline-block py-1.5 px-4 border border-white/40 rounded-full text-white/90 text-xs font-bold tracking-[0.25em] uppercase mb-8 backdrop-blur-sm">
                             Hành trình khai phá tiềm năng
@@ -69,7 +69,7 @@ const HomePage: React.FC<HomePageProps> = ({
                             PathAI là không gian an toàn để bạn khám phá bản thân, lắng nghe nội tâm và từng bước xây dựng con đường sự nghiệp vững chắc.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
                             {onOpenDecisionDashboard && (
                                 <button
                                     onClick={onOpenDecisionDashboard}
@@ -96,7 +96,7 @@ const HomePage: React.FC<HomePageProps> = ({
             </section>
 
             {/* --- ENTRY POINTS (Floating Cards) --- */}
-            <section id="journey-start" className="relative z-20 -mt-32 px-4 pb-24">
+            <section id="journey-start" className="relative z-20 -mt-20 md:-mt-24 px-4 pb-24">
                 <div className="container mx-auto max-w-6xl">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Card 1 */}
