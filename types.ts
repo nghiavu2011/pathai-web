@@ -231,7 +231,7 @@ export interface UserData {
   location: string;
   status: string; // Current status (student, employee, etc.)
   educationLevel: string; // Trình độ học vấn
-  source: string; // Where did they hear about us
+  source?: string; // Where did they hear about us
   expectations: string; // What do they want from the app
   birthOrder?: string; // New: Thứ tự sinh
   maritalStatus?: string; // New: TÌnh trạng hôn nhân

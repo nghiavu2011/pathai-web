@@ -10,8 +10,7 @@ export const MI_STEPS: Step[] = [
   { id: 6, title: 'Nội tâm' },
   { id: 7, title: 'Giao tiếp' },
   { id: 8, title: 'Tự nhiên' },
-  { id: 9, title: 'Đăng ký' },
-  { id: 10, title: 'Kết quả' },
+  { id: 9, title: 'Kết quả' },
 ];
 
 export const MI_INTRODUCTION: Introduction = {

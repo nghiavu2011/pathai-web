@@ -1,42 +1,33 @@
-
 import React, { useState } from 'react';
 import { UserData } from '../types';
-import { auth, googleProvider, db } from '../config/firebase';
-import { signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { StorageService } from '../services/storageService';
+import { db } from '../config/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface LoginProps {
     onLogin: (data: UserData) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-    const [step, setStep] = useState(1); // Default to Personal Info (Step 1)
+    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [authError, setAuthError] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<UserData>({
         fullName: '',
         email: '',
-        phone: '',
         birthYear: '',
         gender: '',
         location: '',
-        status: '',
-        educationLevel: '',
-        source: '',
+        status: 'Học sinh THPT',
+        educationLevel: 'THPT',
+        source: 'Website',
         expectations: '',
-        birthOrder: '',
-        maritalStatus: '',
-        sexualOrientation: '',
         bio: '',
         avatarUrl: '',
         uid: ''
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
-
-    // Google Login Removed
-
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -59,10 +50,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     const validateStep2 = () => {
         const newErrors: Record<string, string> = {};
-        if (!formData.educationLevel) newErrors.educationLevel = "Vui lòng chọn trình độ học vấn.";
-        if (!formData.location) newErrors.location = "Vui lòng chọn nơi sinh sống.";
-        if (!formData.birthOrder) newErrors.birthOrder = "Vui lòng chọn thứ tự trong gia đình.";
-        if (!formData.maritalStatus) newErrors.maritalStatus = "Vui lòng chọn tình trạng hôn nhân.";
+        if (!formData.educationLevel) newErrors.educationLevel = "Vui lòng chọn trình độ học vấn hiện tại.";
+        if (!formData.location) newErrors.location = "Vui lòng chọn tỉnh / thành phố.";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -70,8 +59,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     const validateStep3 = () => {
         const newErrors: Record<string, string> = {};
-        if (!formData.status) newErrors.status = "Vui lòng chọn trạng thái hiện tại.";
-        if (!formData.expectations.trim()) newErrors.expectations = "Hãy chia sẻ mong muốn của bạn.";
+        if (!formData.status) newErrors.status = "Vui lòng chọn trạng thái học tập.";
+        if (!formData.expectations.trim()) newErrors.expectations = "Hãy chia sẻ mục tiêu hoặc băn khoăn của bạn.";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -90,51 +79,60 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const saveUserProfile = () => {
         setLoading(true);
         try {
-            // Generate a random guest ID if not present
-            const finalData = { ...formData, uid: formData.uid || `guest-${Date.now()}` };
+            const uid = formData.uid || `student-${Date.now()}`;
+            const finalData: UserData = { ...formData, uid };
 
-            // Save to localStorage immediately (Offline-first)
-            localStorage.setItem('localUserProfile', JSON.stringify(finalData));
+            // Save via namespaced StorageService
+            StorageService.saveUserProfile(finalData);
 
-            // Optional background sync to Firestore without blocking the user
+            // Optional background sync to Firestore
             try {
-                if (db) {
-                    setDoc(doc(db, 'users', finalData.uid), {
+                if (db && import.meta.env.VITE_FIREBASE_API_KEY) {
+                    setDoc(doc(db, 'users', uid), {
                         ...finalData,
                         createdAt: new Date().toISOString(),
                         lastActive: new Date().toISOString()
-                    }).catch(fsError => {
-                        console.warn("Silent Firestore sync skipped/failed:", fsError);
-                    });
+                    }).catch(() => {});
                 }
-            } catch (syncErr) {
-                console.warn("Background sync error:", syncErr);
+            } catch {
+                // Ignore silent sync errors in offline mode
             }
 
-            // Immediately complete login
             onLogin(finalData);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Save Profile Error:", error);
         } finally {
             setLoading(false);
         }
     };
 
-
-
     const renderStep1 = () => (
         <div className="animate-slide-up space-y-4">
-            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Thông tin cơ bản</h3>
+            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Thông tin học sinh</h3>
 
             <div className="grid grid-cols-1 gap-4">
                 <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Tên hiển thị</label>
-                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500" placeholder="Họ và tên hoặc Biệt danh" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Tên hiển thị / Biệt danh</label>
+                    <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                        placeholder="VD: Nguyễn Văn A hoặc Minh Anh"
+                    />
                     {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Địa chỉ Email</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500" placeholder="email@vi-du.com" />
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                        placeholder="hocsinh@example.com"
+                    />
                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
             </div>
@@ -142,37 +140,34 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Năm sinh</label>
-                    <select name="birthYear" value={formData.birthYear} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
+                    <select
+                        name="birthYear"
+                        value={formData.birthYear}
+                        onChange={handleChange}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                    >
                         <option value="">Chọn năm</option>
-                        {Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - 10 - i).map(year => (
-                            <option key={year} value={year}>{year}</option>
+                        {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - 12 - i).map(year => (
+                            <option key={year} value={year}>{year} {year === 2011 ? '(Lớp 9)' : year === 2010 ? '(Lớp 10)' : year === 2009 ? '(Lớp 11)' : year === 2008 ? '(Lớp 12)' : ''}</option>
                         ))}
                     </select>
                     {errors.birthYear && <p className="text-red-500 text-xs mt-1">{errors.birthYear}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
-                    <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
+                    <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                    >
                         <option value="">Chọn</option>
                         <option value="Nam">Nam</option>
                         <option value="Nữ">Nữ</option>
-                        <option value="Khác">Khác</option>
+                        <option value="Khác">Khác / Không chia sẻ</option>
                     </select>
                     {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
                 </div>
-            </div>
-
-            <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Xu hướng tính dục <span className="text-slate-400 font-normal">(Không bắt buộc)</span></label>
-                <select name="sexualOrientation" value={formData.sexualOrientation} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
-                    <option value="">Chọn (Bạn có thể bỏ qua)</option>
-                    <option value="Khác giới">Khác giới (Heterosexual)</option>
-                    <option value="Đồng giới">Đồng giới (Homosexual)</option>
-                    <option value="Song giới">Song giới (Bisexual)</option>
-                    <option value="Toàn giới">Toàn giới (Pansexual)</option>
-                    <option value="Khác">Khác</option>
-                    <option value="Kín">Không muốn tiết lộ</option>
-                </select>
             </div>
 
             <button onClick={handleNext} className="w-full py-3 bg-sage-600 hover:bg-sage-700 text-white font-bold rounded-xl transition-colors mt-2 shadow-lg shadow-sage-100">
@@ -183,56 +178,41 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     const renderStep2 = () => (
         <div className="animate-slide-up space-y-4">
-            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Gia đình & Xã hội</h3>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Bạn là con thứ mấy?</label>
-                    <select name="birthOrder" value={formData.birthOrder} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
-                        <option value="">Chọn</option>
-                        <option value="Con cả">Con cả</option>
-                        <option value="Con thứ">Con thứ</option>
-                        <option value="Con út">Con út</option>
-                        <option value="Con một">Con một</option>
-                    </select>
-                    {errors.birthOrder && <p className="text-red-500 text-xs mt-1">{errors.birthOrder}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Gia đình</label>
-                    <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
-                        <option value="">Tình trạng</option>
-                        <option value="Độc thân">Độc thân</option>
-                        <option value="Đang hẹn hò">Đang hẹn hò</option>
-                        <option value="Kết hôn">Kết hôn</option>
-                        <option value="Ly hôn">Ly hôn / Ly thân</option>
-                        <option value="Góa">Góa</option>
-                    </select>
-                    {errors.maritalStatus && <p className="text-red-500 text-xs mt-1">{errors.maritalStatus}</p>}
-                </div>
-            </div>
+            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Học vấn & Khu vực</h3>
 
             <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Trình độ học vấn</label>
-                <select name="educationLevel" value={formData.educationLevel} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
-                    <option value="">Chọn trình độ cao nhất</option>
-                    <option value="THCS">Trung học cơ sở</option>
-                    <option value="THPT">Trung học phổ thông</option>
-                    <option value="Cao đẳng/Đại học">Cao đẳng / Đại học</option>
-                    <option value="Sau Đại học">Sau Đại học (Thạc sĩ, Tiến sĩ)</option>
-                    <option value="Khác">Khác</option>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Khối lớp / Trình độ hiện tại</label>
+                <select
+                    name="educationLevel"
+                    value={formData.educationLevel}
+                    onChange={handleChange}
+                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                >
+                    <option value="">Chọn khối lớp</option>
+                    <option value="Lớp 9 (Chuẩn bị vào Lớp 10)">Học sinh Lớp 9 (Chuẩn bị chọn môn Lớp 10)</option>
+                    <option value="Lớp 10">Học sinh Lớp 10 (Chương trình GDPT 2018)</option>
+                    <option value="Lớp 11">Học sinh Lớp 11 (Chuẩn bị thi ĐGNL / HSA / TSA / SAT)</option>
+                    <option value="Lớp 12">Học sinh Lớp 12 (Chuẩn bị thi tốt nghiệp & xét tuyển ĐH)</option>
+                    <option value="Sinh viên Đại học / Cao đẳng">Sinh viên Đại học / Cao đẳng</option>
+                    <option value="Khác">Phụ huynh / Khác</option>
                 </select>
                 {errors.educationLevel && <p className="text-red-500 text-xs mt-1">{errors.educationLevel}</p>}
             </div>
 
             <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Nơi sinh sống</label>
-                <select name="location" value={formData.location} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Tỉnh / Thành phố sinh sống</label>
+                <select
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                >
                     <option value="">Chọn khu vực</option>
-                    <option value="Hà Nội">Hà Nội</option>
-                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                    <option value="Đà Nẵng">Đà Nẵng</option>
-                    <option value="Khác">Tỉnh/Thành phố khác</option>
-                    <option value="Nước ngoài">Nước ngoài</option>
+                    <option value="Hà Nội">Hà Nội & Miền Bắc</option>
+                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh & Miền Nam</option>
+                    <option value="Đà Nẵng">Đà Nẵng & Miền Trung</option>
+                    <option value="Tỉnh thành khác">Tỉnh / Thành phố khác</option>
+                    <option value="Nước ngoài">Nước ngoài / Du học sinh</option>
                 </select>
                 {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
             </div>
@@ -250,32 +230,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     const renderStep3 = () => (
         <div className="animate-slide-up space-y-4">
-            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Danh tính & Mục tiêu</h3>
+            <h3 className="text-xl font-bold text-sage-800 dark:text-slate-100 text-center mb-4">Mục tiêu & Định hướng</h3>
 
             <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Trạng thái hiện tại</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500">
-                    <option value="">Bạn đang là...</option>
-                    <option value="Học sinh">Học sinh THPT tìm hướng đi</option>
-                    <option value="Sinh viên">Sinh viên đang học tập</option>
-                    <option value="Người mới đi làm">Người mới đi làm (dưới 2 năm)</option>
-                    <option value="Người đi làm lâu năm">Người đi làm muốn chuyển nghề</option>
-                    <option value="Tự do">Người lao động tự do / Freelancer</option>
-                    <option value="Khác">Khác</option>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Mục tiêu hiện tại của bạn</label>
+                <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500"
+                >
+                    <option value="">Chọn mục tiêu chính...</option>
+                    <option value="Định hướng chọn môn Lớp 10">Định hướng chọn tổ hợp môn Lớp 10</option>
+                    <option value="Khám phá ngành học Đại học phù hợp">Khám phá nhóm ngành học Đại học phù hợp</option>
+                    <option value="Lên chiến lược thi ĐGNL / ĐGTD / SAT">Lên chiến lược thi ĐGNL / HSA / TSA / SAT</option>
+                    <option value="Thấu hiểu bản thân & thế mạnh tự nhiên">Thấu hiểu bản thân & phát huy thế mạnh tự nhiên</option>
+                    <option value="Giải tỏa lo âu & rào cản chọn ngành">Giải tỏa lo âu & giải quyết bế tắc chọn ngành</option>
                 </select>
                 {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
-            </div>
-
-            <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Đôi điều về bản thân <span className="text-slate-400 font-normal">(Tính cách, sở thích...)</span></label>
-                <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    rows={2}
-                    placeholder="VD: Tôi là người hướng nội, yêu thiên nhiên và thích đọc sách..."
-                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500 text-sm"
-                />
             </div>
 
             <div>
@@ -285,10 +257,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     value={formData.expectations}
                     onChange={handleChange}
                     rows={2}
-                    placeholder="VD: Tìm nghề phù hợp, chữa lành rào cản tâm lý..."
+                    placeholder="VD: Muốn biết mình hợp với Công nghệ hay Kinh tế, cần chuẩn bị môn gì..."
                     className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500 text-sm"
                 />
                 {errors.expectations && <p className="text-red-500 text-xs mt-1">{errors.expectations}</p>}
+            </div>
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Đôi nét về sở thích / môn học yêu thích <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
+                </label>
+                <textarea
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleChange}
+                    rows={2}
+                    placeholder="VD: Thích môn Toán và Tin học, thích tìm tòi máy tính, hay vẽ tranh..."
+                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-sage-500 text-sm"
+                />
             </div>
 
             <div className="flex gap-3 mt-4">
@@ -296,7 +282,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     Quay lại
                 </button>
                 <button disabled={loading} onClick={handleNext} className="flex-[2] py-3 bg-sage-600 hover:bg-sage-700 text-white font-bold rounded-xl transition-colors flex justify-center shadow-lg shadow-sage-100">
-                    {loading ? <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : "Hoàn tất & Bắt đầu"}
+                    {loading ? <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : "Bắt đầu khám phá"}
                 </button>
             </div>
         </div>
@@ -304,12 +290,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-cream-50 dark:bg-slate-900 p-4 font-sans relative overflow-hidden">
-            {/* Background Blobs */}
+            {/* Ambient Blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sage-200/40 rounded-full blur-[100px]"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-200/40 rounded-full blur-[100px]"></div>
 
             <div className="w-full max-w-md relative z-10">
-                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-slate-700">
+                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-slate-700">
 
                     {/* Logo Header */}
                     <div className="flex flex-col items-center mb-6">
@@ -324,12 +310,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <p className="text-sage-500 dark:text-slate-400 text-sm font-medium tracking-widest uppercase mt-1">Hành trình thấu hiểu bản thân</p>
                     </div>
 
-                    {/* Progress Bar for Steps 1, 2 & 3 */}
+                    {/* Stepper Indicator */}
                     <div className="mb-6">
                         <div className="flex justify-between text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-2">
-                            <span className={step >= 1 ? "text-sage-600" : ""}>Hồ sơ</span>
-                            <span className={step >= 2 ? "text-sage-600" : ""}>Bối cảnh</span>
-                            <span className={step >= 3 ? "text-sage-600" : ""}>Định hướng</span>
+                            <span className={step >= 1 ? "text-sage-600 font-bold" : ""}>Học sinh</span>
+                            <span className={step >= 2 ? "text-sage-600 font-bold" : ""}>Khối lớp</span>
+                            <span className={step >= 3 ? "text-sage-600 font-bold" : ""}>Mục tiêu</span>
                         </div>
                         <div className="h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
@@ -339,7 +325,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         </div>
                     </div>
 
-                    {/* Content Render */}
+                    {/* Active Step Content */}
                     <div className="min-h-[350px]">
                         {step === 1 && renderStep1()}
                         {step === 2 && renderStep2()}
@@ -349,7 +335,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
 
                 <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-8 font-medium">
-                    Developed by NM_AI_ART © 2025
+                    PathAI Guidance System • GDPT 2018
                 </p>
             </div>
         </div>

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
 import { Goal } from '../../types';
 import LoadingSpinner from '../LoadingSpinner';
+import { AICounselService } from '../../services/aiCounselService';
 
 interface GoalSettingProps {
   quizId: string;
@@ -19,40 +18,37 @@ const GoalSetting: React.FC<GoalSettingProps> = ({ quizId, quizTitle, results, o
   const [addedGoals, setAddedGoals] = useState<string[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchSuggestions = async () => {
       if (!results) return;
       setIsLoading(true);
       setError(null);
 
       try {
-        if (!process.env.API_KEY) {
-          throw new Error("API key not configured.");
-        }
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const prompt = `Dựa trên kết quả trắc nghiệm "${quizTitle}" này: ${JSON.stringify(results, null, 2)}, hãy đề xuất 3 mục tiêu hành động cụ thể, ngắn gọn (mỗi mục tiêu dưới 150 ký tự) cho một người dùng để họ khám phá sự nghiệp. Trả về một mảng JSON các chuỗi. Ví dụ: ["Nghiên cứu 3 ngành học liên quan đến kết quả.", "Trò chuyện với 1 người đang làm trong lĩnh vực nổi bật.", "Tham gia một workshop online về kỹ năng X."]. Chỉ trả về mảng JSON.`;
-        
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
+        const goals = await AICounselService.getGoalSuggestions({
+          quizId,
+          quizTitle,
+          results,
         });
-        
-        const text = response.text.trim();
-        const jsonString = text.startsWith('```json') ? text.substring(7, text.length - 3).trim() : text;
-        const parsedGoals = JSON.parse(jsonString);
-        if (Array.isArray(parsedGoals) && parsedGoals.every(g => typeof g === 'string')) {
-          setSuggestedGoals(parsedGoals);
-        } else {
-          throw new Error("Invalid format received from AI.");
+        if (isMounted) {
+          setSuggestedGoals(goals);
         }
       } catch (err) {
         console.error("Error fetching goal suggestions:", err);
-        setError("Không thể tải gợi ý mục tiêu từ AI.");
+        if (isMounted) {
+          setError("Không thể tải gợi ý mục tiêu từ AI.");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchSuggestions();
+    return () => {
+      isMounted = false;
+    };
   }, [quizId, quizTitle, results]);
 
   const handleAddSuggested = (goalText: string) => {

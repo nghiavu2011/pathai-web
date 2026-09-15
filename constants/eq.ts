@@ -8,8 +8,7 @@ export const EQ_STEPS: Step[] = [
   { id: 3, title: 'Động lực' },
   { id: 4, title: 'Đồng cảm' },
   { id: 5, title: 'Kỹ năng XH' },
-  { id: 6, title: 'Đăng ký' },
-  { id: 7, title: 'Kết quả' },
+  { id: 6, title: 'Kết quả' },
 ];
 
 export const EQ_INTRODUCTION: Introduction = {

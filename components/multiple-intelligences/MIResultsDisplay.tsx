@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { MIResults, Answers, UserData, MICategoryKey } from '../../types';
 import { MI_RESULT_DETAILS, MI_CAREER_SUGGESTIONS, MI_QUIZ_DATA } from '../../constants/multipleIntelligences';
@@ -22,13 +21,20 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
 
   const sortedResults = useMemo(() => {
     return (Object.keys(results) as MICategoryKey[])
-      .map(key => ({
-        key,
-        name: MI_RESULT_DETAILS[key].name,
-        description: MI_RESULT_DETAILS[key].description,
-        score: results[key] / 5 * 100, // Normalize score to 100 for chart
-        originalScore: results[key]
-      }))
+      .map(key => {
+        const rawScore = results[key] || 0;
+        // Raw score is sum of 5 items (5 to 25)
+        const meanScore = Number((rawScore / 5).toFixed(1));
+        const normalizedPercentage = Math.min(100, Math.max(0, Math.round((rawScore / 25) * 100)));
+        return {
+          key,
+          name: MI_RESULT_DETAILS[key]?.name || key,
+          description: MI_RESULT_DETAILS[key]?.description || '',
+          score: normalizedPercentage, // 0 to 100 for Radar Chart
+          meanScore, // 1.0 to 5.0
+          originalScore: rawScore // 5 to 25
+        };
+      })
       .sort((a, b) => b.originalScore - a.originalScore);
   }, [results]);
 
@@ -40,74 +46,55 @@ const MIResultsDisplay: React.FC<MIResultsDisplayProps> = (props) => {
   const topThree = sortedResults.slice(0, 3);
   const topIntelligencesString = topThree.map(r => `**${r.name}**`).join(', ');
 
-  // Texts
   // Create Evidence Based Analysis
   const evidenceText = useMemo(() => {
     let text = "";
-    topThree.forEach((result, index) => {
-
-      // Actually structure is `questions` inside categories. `MI_QUIZ_DATA` is an array of categories.
-      // We need to find the category that contains questions with `mi_code` matching result.key
-
-      // Find high scoring questions (4 or 5) for this category
-      // Since quiz structure might vary, let's filter all questions in MI_QUIZ_DATA flatly or by category if known
-      let highTags: string[] = [];
-
+    topThree.forEach((result) => {
+      const highTags: string[] = [];
       MI_QUIZ_DATA.forEach(cat => {
         cat.questions.forEach(q => {
-          if (q.mi_code === result.key && answers[q.id] >= 4) {
-            // Truncate long text for brevity e.g. "Tôi thích..." -> "thích..."
+          if (q.mi_code === result.key && answers && answers[q.id] >= 4) {
             const shortText = q.text.replace(/^(Tôi|Bạn)\s+/, '').toLowerCase();
             highTags.push(shortText);
           }
-        })
+        });
       });
 
       if (highTags.length > 0) {
-        // Pick up to 2 traits
         const selectedValues = highTags.slice(0, 2).join(", ");
-        text += `\n- Với **${result.name.split('–')[0]}**: Một phần con người bạn bộc lộ rất tự nhiên qua việc ${selectedValues}.`;
+        text += `\n- Với **${result.name.split('–')[0]}**: Bạn bộc lộ sự tự tin qua việc ${selectedValues}.`;
       }
     });
     return text;
   }, [topThree, answers]);
 
-  const profileSummary = useMemo(() => {
+  const studentSummary = useMemo(() => {
     if (!userData) return "";
-    return `
-Bối cảnh cá nhân:
-- Gia đình: Là ${userData.birthOrder || 'con trong gia đình'}, tình trạng ${userData.maritalStatus || 'độc thân'}.
-- Xu hướng & Bản dạng: ${userData.gender} (${userData.sexualOrientation || 'kín'}).
-- Trạng thái: ${userData.status}, sống tại ${userData.location}.
-- Câu chuyện bản thân: "${userData.bio || 'Chưa chia sẻ'}"
-- Mong đợi: ${userData.expectations}
-`.trim();
+    return `Học sinh: ${userData.fullName || 'Bạn'}, Khối lớp: ${userData.educationLevel || 'THPT'}, Khu vực: ${userData.location || 'Việt Nam'}, Mục tiêu: ${userData.expectations || 'Định hướng nghề nghiệp'}`;
   }, [userData]);
 
   const analysisContent = `
 Chào **${userData?.fullName || 'bạn'}**, 
 
-Tôi đã lắng nghe tâm tư và quan sát những chỉ số của bạn. Với tư cách là một người đồng hành trong hành trình thấu hiểu, tôi nhận thấy ở bạn một nội lực rất đáng trân trọng.
+Dựa trên kết quả trắc nghiệm Trí thông minh Đa diện (Multiple Intelligences), bạn sở hữu 3 loại hình trí thông minh nổi trội: ${topIntelligencesString}.
 
-Bạn sở hữu 3 loại hình trí thông minh nổi trội: ${topIntelligencesString}.
+**Những biểu hiện nổi bật của bạn:**
+${evidenceText || 'Bạn thể hiện sự phân bổ năng lực cân bằng và linh hoạt giữa các nhóm trí thông minh.'}
 
-**Những "tín hiệu" từ nội tâm bạn:**
-${evidenceText}
-
-🚀 **Lời nhắn nhủ từ PathAI:**
-Dựa trên bối cảnh ${userData?.status?.toLowerCase()} và những mong muốn về *"${userData?.expectations}"*, tôi tin rằng sự kết hợp giữa các thế mạnh này sẽ giúp bạn vượt qua những tự ti hay rào cản hiện tại. Đừng quên rằng mỗi chặng đường bạn đi đều tích lũy thêm những giá trị quý giá. Hãy vững tin, vì bạn có đủ nguồn lực để chạm đến phiên bản hoàn hảo nhất của chính mình!
+🚀 **Lời khuyên từ PathAI:**
+Mỗi loại hình trí thông minh là một công cụ giúp bạn tiếp thu kiến thức và giải quyết vấn đề. Hãy tận dụng tối đa 3 thế mạnh hàng đầu này trong việc lựa chọn khối thi, tổ hợp môn THPT và các dự án học tập thực tế!
 `;
 
   const systemInstruction = `
-Bạn là một Chuyên gia Tâm lý học cao cấp và người chữa lành (Healer), có khả năng thấu cảm sâu sắc.
-Hãy phân tích kết quả Multiple Intelligences: ${JSON.stringify(results)}
-Dựa trên hồ sơ người dùng: ${profileSummary}
-
-Mục tiêu: Đưa ra lời khuyên chuyên nghiệp, chân thành, sát đáng. Tập trung vào việc chữa lành, hướng con người vươn lên, vượt qua các rào cản cá nhân và tự ti. Sử dụng ngôn từ tinh tế, nhân văn, mở ra "chân trời mới" dựa trên bối cảnh sống riêng biệt của họ (như thứ tự sinh, tình trạng hôn nhân, câu chuyện bản thân).
+Bạn là Chuyên gia Tư vấn Hướng nghiệp THPT.
+Phân tích kết quả Trí thông minh Đa diện (Gardner MI): ${JSON.stringify(results)}.
+Thông tin học sinh: ${studentSummary}.
+Mục tiêu: Đưa ra lời khuyên học tập, chọn tổ hợp môn và định hướng nghề nghiệp thực tế, tích cực, không phán xét.
 `;
-  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn biết cách áp dụng chúng vào công việc không?`;
+
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn tìm hiểu các ngành học phát huy tốt nhất các thế mạnh này không?`;
   const topIntelligencesStringForSearch = topThree.map(r => r.name.split('–')[0].trim()).join(', ');
-  const newsQuery = `cách phát triển và ứng dụng trí thông minh ${topIntelligencesStringForSearch} trong sự nghiệp`;
+  const newsQuery = `cách phát triển và ứng dụng trí thông minh ${topIntelligencesStringForSearch} trong học tập và nghề nghiệp`;
 
   return (
     <BaseResultPage
@@ -125,18 +112,21 @@ Mục tiêu: Đưa ra lời khuyên chuyên nghiệp, chân thành, sát đáng.
                       <h4 className="font-bold text-base text-teal-700 dark:text-teal-400">{result.name}</h4>
                       <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{result.description}</p>
                     </div>
-                    <span className="font-mono font-bold text-lg bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
-                      {result.originalScore}/5
-                    </span>
+                    <div className="text-right">
+                      <span className="font-mono font-bold text-sm bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 px-2 py-1 rounded border border-teal-200 dark:border-teal-800 inline-block">
+                        {result.meanScore} / 5.0
+                      </span>
+                      <span className="block text-xs text-slate-400 mt-0.5">({result.originalScore}/25)</span>
+                    </div>
                   </div>
                   {careerSuggestion && (
                     <div className="mt-3 text-sm">
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">Gợi ý nghề: </span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Gợi ý nhóm ngành: </span>
                       <span className="text-slate-600 dark:text-slate-400">{careerSuggestion.careers}</span>
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         </>

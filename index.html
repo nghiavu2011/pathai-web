@@ -6,39 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO Meta Tags -->
-  <title>PathAI - Hành trình Thấu hiểu Bản thân & Kiến tạo Sự nghiệp</title>
+  <title>PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai (Lớp 9–12)</title>
   <meta name="description"
-    content="Khám phá tính cách, trí thông minh đa diện và định hướng nghề nghiệp cùng PathAI. Công cụ đánh giá tâm lý chuyên sâu dựa trên khoa học giúp bạn hiểu chính mình và bứt phá." />
+    content="Hệ thống định hướng hướng nghiệp và quyết định học tập cho học sinh THPT: Trắc nghiệm tâm lý khoa học (Holland, Big Five, Gardner MI, Schein), Lập kế hoạch chọn môn lớp 10 (GDPT 2018), Chiến lược thi ĐGNL/TSA/SAT và Mô phỏng tương lai." />
   <meta name="keywords"
-    content="trắc nghiệm tính cách, định hướng nghề nghiệp, thấu hiểu bản thân, trí thông minh đa diện, holland, MBTI, Big Five, PathAI, chữa lành tâm hồn" />
+    content="trắc nghiệm tính cách, định hướng nghề nghiệp, chọn môn lớp 10, GDPT 2018, ĐGNL, TSA, SAT, holland RIASEC, Big Five, PathAI, hướng nghiệp học sinh" />
   <meta name="author" content="PathAI Team" />
   <meta name="robots" content="index, follow" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://pathai-web-intro.vercel.app/" />
-  <meta property="og:title" content="PathAI - Hành trình Thấu hiểu Bản thân" />
+  <meta property="og:title" content="PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai" />
   <meta property="og:description"
-    content="Khi bạn chưa biết mình sẽ đi đâu, hãy bắt đầu bằng việc hiểu chính mình. Khám phá ngay!" />
+    content="Khi bạn chưa biết mình sẽ đi đâu, hãy bắt đầu bằng việc hiểu chính mình. Khám phá 11 bài trắc nghiệm và bản đồ định hướng lớp 9–12!" />
   <meta property="og:image" content="/zen_nature_1_1768643740914.png" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://pathai-web-intro.vercel.app/" />
-  <meta property="twitter:title" content="PathAI - Hành trình Thấu hiểu Bản thân" />
+  <meta property="twitter:title" content="PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai" />
   <meta property="twitter:description"
-    content="Khi bạn chưa biết mình sẽ đi đâu, hãy bắt đầu bằng việc hiểu chính mình." />
+    content="Khám phá bản thân và xây dựng lộ trình sự nghiệp vững chắc cùng PathAI." />
   <meta property="twitter:image" content="/zen_nature_1_1768643740914.png" />
-
-  <!-- Google Analytics (GA4) -->
-  <!-- User: Thay thế G-XXXXXXXXXX bằng ID GA4 của bạn -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,49 +104,48 @@
   </script>
   <style type="text/tailwindcss">
     @tailwind base;
-        @tailwind components;
-        @tailwind utilities;
-        
-        body {
-            @apply font-sans bg-cream-50 text-slate-800 transition-colors duration-700;
-        }
+    @tailwind components;
+    @tailwind utilities;
+    
+    body {
+        @apply font-sans bg-cream-50 text-slate-800 transition-colors duration-700;
+    }
 
-        .glass-card {
-            @apply bg-white/80 backdrop-blur-md border border-white/60 shadow-card;
-        }
+    .glass-card {
+        @apply bg-white/80 backdrop-blur-md border border-white/60 shadow-card;
+    }
 
-        .text-balance {
-            text-wrap: balance;
-        }
+    .text-balance {
+        text-wrap: balance;
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          @apply bg-transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-          @apply bg-sage-300/50 rounded-full hover:bg-sage-400 transition-colors;
-        }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      @apply bg-transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      @apply bg-sage-300/50 rounded-full hover:bg-sage-400 transition-colors;
+    }
 
-        /* Fix html2canvas crash with backdrop-filter */
-        body.is-capturing .glass-card {
-            background-color: #ffffff !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            box-shadow: none !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        body.is-capturing .animate-slow-fade,
-        body.is-capturing .animate-slide-up, 
-        body.is-capturing .animate-card-fade-in-up {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-        }
-    </style>
-  <link rel="stylesheet" href="/index.css">
+    /* Fix html2canvas crash with backdrop-filter */
+    body.is-capturing .glass-card {
+        background-color: #ffffff !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+    body.is-capturing .animate-slow-fade,
+    body.is-capturing .animate-slide-up, 
+    body.is-capturing .animate-card-fade-in-up {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+  </style>
 </head>
 
 <body class="dark:bg-slate-900 dark:text-slate-300">

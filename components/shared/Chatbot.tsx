@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Chat } from "@google/genai";
 import { ChatMessage } from '../../types';
 import { renderMarkdown } from '../../utils/renderMarkdown';
+import { AICounselService } from '../../services/aiCounselService';
 
 interface ChatbotProps {
   systemInstruction: string;
@@ -12,7 +11,6 @@ interface ChatbotProps {
 }
 
 const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, suggestedPrompts = [], isPdfMode = false }) => {
-  const [chat, setChat] = useState<Chat | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -20,80 +18,41 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [showPrompts, setShowPrompts] = useState(true);
 
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
-  const [showKeyInput, setShowKeyInput] = useState(!localStorage.getItem('gemini_api_key'));
-
   useEffect(() => {
-    try {
-      if (!apiKey) {
-        setChat(null);
-        return;
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      const chatSession = ai.chats.create({
-        model: 'gemini-1.5-flash', // Updated to stable model
-        config: { systemInstruction },
-      });
-      setChat(chatSession);
-      setChatHistory([{ role: 'model', content: initialMessage }]);
-      setShowPrompts(true);
-      setChatError(null);
-    } catch (error) {
-      console.error("Error initializing chat:", error);
-      setChatError("Không thể khởi tạo chatbot. Vui lòng kiểm tra API Key.");
-    }
-  }, [systemInstruction, initialMessage, apiKey]);
-
-  const handleSaveKey = (key: string) => {
-    if (key.trim()) {
-      localStorage.setItem('gemini_api_key', key.trim());
-      setApiKey(key.trim());
-      setShowKeyInput(false);
-    }
-  };
+    setChatHistory([{ role: 'model', content: initialMessage }]);
+    setShowPrompts(true);
+    setChatError(null);
+  }, [initialMessage, systemInstruction]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, isChatLoading]);
 
   const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !chat || isChatLoading) return;
+    if (!message.trim() || isChatLoading || isPdfMode) return;
 
     const userInput: ChatMessage = { role: 'user', content: message.trim() };
-    setChatHistory(prev => [...prev, userInput]);
+    const updatedHistory = [...chatHistory, userInput];
+    setChatHistory(updatedHistory);
     setChatInput('');
     setIsChatLoading(true);
     setChatError(null);
     setShowPrompts(false);
 
     try {
-      const stream = await chat.sendMessageStream({ message: userInput.content });
-      let modelResponse = '';
-      setChatHistory(prev => [...prev, { role: 'model', content: '' }]);
+      const responseContent = await AICounselService.sendChatMessage({
+        messages: updatedHistory,
+        systemInstruction
+      });
 
-      for await (const chunk of stream) {
-        modelResponse += chunk.text;
-        setChatHistory(prev => {
-          const newHistory = [...prev];
-          newHistory[newHistory.length - 1].content = modelResponse;
-          return newHistory;
-        });
-      }
+      setChatHistory(prev => [...prev, { role: 'model', content: responseContent }]);
     } catch (error) {
       console.error("Chat error:", error);
-      const errorMessage = "Rất tiếc, đã có lỗi xảy ra. Vui lòng thử lại.";
+      const errorMessage = "Rất tiếc, đã có lỗi xảy ra khi kết nối trợ lý. Vui lòng thử lại.";
       setChatError(errorMessage);
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        if (newHistory.length > 0 && newHistory[newHistory.length - 1].role === 'model') {
-          newHistory[newHistory.length - 1].content = errorMessage;
-          return newHistory;
-        }
-        return [...newHistory, { role: 'model', content: errorMessage }];
-      });
+      setChatHistory(prev => [...prev, { role: 'model', content: errorMessage }]);
     } finally {
       setIsChatLoading(false);
       setShowPrompts(true);
@@ -108,32 +67,6 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
   const handlePromptClick = (prompt: string) => {
     handleSendMessage(prompt);
   };
-
-  if (showKeyInput && !isPdfMode) {
-    return (
-      <div className="mt-12 animate-fade-in">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
-          <h3 className="text-xl font-bold mb-4 text-blue-800 dark:text-blue-200">Kích hoạt Trợ lý AI</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
-            Để sử dụng tính năng tư vấn, vui lòng nhập <strong>Gemini API Key</strong> của bạn.
-            <br />(Chúng tôi không lưu trữ key này trên máy chủ, chỉ lưu ở trình duyệt của bạn).
-            <br />
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">Lấy Key miễn phí tại đây</a>
-          </p>
-          <div className="flex max-w-sm mx-auto gap-2">
-            <input
-              type="password"
-              placeholder="Dán API Key vào đây..."
-              className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600"
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveKey((e.target as HTMLInputElement).value) }}
-              onBlur={(e) => handleSaveKey(e.target.value)}
-            />
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">Lưu</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
@@ -156,7 +89,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
               </div>
             </div>
           ))}
-          {isChatLoading && chatHistory[chatHistory.length - 1]?.role === 'user' && (
+          {isChatLoading && (
             <div className="flex items-end gap-2 justify-start">
               <div className="w-8 h-8 rounded-full bg-teal-500 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm">AI</div>
               <div className="max-w-prose p-3 rounded-lg bg-slate-200 dark:bg-slate-700 rounded-bl-none">
@@ -194,11 +127,11 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder={isPdfMode ? "Trò chuyện bị vô hiệu hóa khi tạo PDF" : (isChatLoading ? "Chuyên gia AI đang trả lời..." : "Đặt câu hỏi của bạn ở đây...")}
-            className="flex-1 px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            disabled={isChatLoading || !chat || isPdfMode}
+            className="flex-1 px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 dark:text-white"
+            disabled={isChatLoading || isPdfMode}
             aria-label="Chat input"
           />
-          <button type="submit" disabled={isChatLoading || !chatInput.trim() || !chat || isPdfMode} className="w-12 h-12 flex-shrink-0 rounded-full bg-blue-600 text-white flex items-center justify-center transition-all transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:scale-100 disabled:cursor-not-allowed" aria-label="Send message">
+          <button type="submit" disabled={isChatLoading || !chatInput.trim() || isPdfMode} className="w-12 h-12 flex-shrink-0 rounded-full bg-blue-600 text-white flex items-center justify-center transition-all transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:scale-100 disabled:cursor-not-allowed" aria-label="Send message">
             {isChatLoading ? (
               <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (

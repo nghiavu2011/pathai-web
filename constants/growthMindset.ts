@@ -6,8 +6,7 @@ export const GMS_STEPS: Step[] = [
   { id: 2, title: 'Thái độ' },
   { id: 3, title: 'Kiên trì' },
   { id: 4, title: 'Linh hoạt' },
-  { id: 5, title: 'Đăng ký' },
-  { id: 6, title: 'Kết quả' },
+  { id: 5, title: 'Kết quả' },
 ];
 
 export const GMS_INTRODUCTION: Introduction = {

@@ -15,8 +15,7 @@ export const CRS_STEPS: Step[] = [
   { id: 3, title: 'Kỹ năng xã hội' },
   { id: 4, title: 'Lập kế hoạch' },
   { id: 5, title: 'Tư duy' },
-  { id: 6, title: 'Đăng ký' },
-  { id: 7, title: 'Kết quả' },
+  { id: 6, title: 'Kết quả' },
 ];
 
 export const CRS_INTRODUCTION: Introduction = {

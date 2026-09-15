@@ -13,8 +13,7 @@ export const CONTEXT_STEPS: Step[] = [
   { id: 2, title: 'Tự chủ' },
   { id: 3, title: 'Ổn định' },
   { id: 4, title: 'Sức khỏe' },
-  { id: 5, title: 'Đăng ký' },
-  { id: 6, title: 'Kết quả' },
+  { id: 5, title: 'Kết quả' },
 ];
 
 export const CONTEXT_INTRODUCTION: Introduction = {

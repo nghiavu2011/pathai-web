@@ -15,8 +15,7 @@ export const CDB_STEPS: Step[] = [
   { id: 3, title: 'Quyết định' },
   { id: 4, title: 'Ảnh hưởng' },
   { id: 5, title: 'Kỹ năng' },
-  { id: 6, title: 'Đăng ký' },
-  { id: 7, title: 'Kết quả' },
+  { id: 6, title: 'Kết quả' },
 ];
 
 export const CDB_INTRODUCTION: Introduction = {

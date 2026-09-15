@@ -7,8 +7,7 @@ export const WHEEL_STEPS: Step[] = [
   { id: 2, title: 'Sức khỏe & Gia đình' },
   { id: 3, title: 'Mối quan hệ & Cảm xúc' },
   { id: 4, title: 'Phát triển & Tâm linh' },
-  { id: 5, title: 'Đăng ký' },
-  { id: 6, title: 'Kết quả' },
+  { id: 5, title: 'Kết quả' },
 ];
 
 export const WHEEL_INTRODUCTION: Introduction = {

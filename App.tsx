@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import {
   Answers,
@@ -16,9 +15,7 @@ import {
   CRSResults,
   GrowthMindsetCategoryKey,
   GrowthMindsetResults,
-  CareerAnchorKey,
   CareerAnchorResults,
-  WorkValueKey,
   WorkValuesResults,
   Results as HollandResults,
   ContextCategoryKey,
@@ -30,12 +27,10 @@ import {
   EQCategoryKey,
   EQResults
 } from './types';
-import { auth, db } from './config/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, addDoc, deleteDoc, getDocs, query, where } from 'firebase/firestore';
+import { StorageService } from './services/storageService';
 
 // Constants
-import { AVAILABLE_QUIZZES, RATING_OPTIONS, RATING_LABELS, QUIZ_DATA as HOLLAND_QUIZ_DATA, STEPS as HOLLAND_STEPS, HOLLAND_INTRODUCTION } from './constants';
+import { QUIZ_DATA as HOLLAND_QUIZ_DATA, STEPS as HOLLAND_STEPS, HOLLAND_INTRODUCTION, RATING_OPTIONS, RATING_LABELS } from './constants';
 import { CDB_QUIZ_DATA, CDB_STEPS, CDB_INTRODUCTION, CDB_RATING_OPTIONS, CDB_RATING_LABELS } from './constants/careerDifficulties';
 import { GRIT_QUIZ_DATA, GRIT_STEPS, GRIT_INTRODUCTION, GRIT_RATING_OPTIONS, GRIT_RATING_LABELS } from './constants/gritScale';
 import { MI_QUIZ_DATA, MI_STEPS, MI_INTRODUCTION, MI_RATING_OPTIONS, MI_RATING_LABELS } from './constants/multipleIntelligences';
@@ -55,7 +50,7 @@ import HomePage from './components/HomePage';
 import LoadingSpinner from './components/LoadingSpinner';
 import QuizIntroduction from './components/shared/QuizIntroduction';
 import QuizStep from './components/shared/QuizStep';
-import Login from './components/Login'; // New Login Component
+import Login from './components/Login';
 import HistoryPage from './components/HistoryPage';
 import GoalsPage from './components/goals/GoalsPage';
 import DonateModal from './components/DonateModal';
@@ -88,41 +83,33 @@ interface QuizState {
 }
 
 const App: React.FC = () => {
-  // Authentication State
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
-
-  // Sync Auth State
-  // Sync Auth State
-  useEffect(() => {
-    // Check if we already have a profile in localStorage
-    const stored = localStorage.getItem('localUserProfile');
-    if (stored) {
-      setUserData(JSON.parse(stored));
-    }
-    setLoadingUser(false);
-  }, []);
-
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(() => localStorage.getItem('pathai:v2:theme') || 'light');
   const [currentView, setCurrentView] = useState<View>('home');
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState>({ currentStep: 0, answers: {} });
   const [results, setResults] = useState<any | null>(null);
+  const [historySnapshotUser, setHistorySnapshotUser] = useState<UserData | null>(null);
 
   const [history, setHistory] = useState<QuizHistoryEntry[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
 
-  // Load User Data (History & Goals) from Firestore
-  // Load User Data (History & Goals) from localStorage (Offline Mode)
+  // Load User Data with total namespace isolation
   useEffect(() => {
     try {
-      const historyLocal = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-      setHistory(historyLocal);
-
-      const goalsLocal = JSON.parse(localStorage.getItem('goals') || '[]');
-      setGoals(goalsLocal);
+      const user = StorageService.initMigration();
+      if (user) {
+        setUserData(user);
+        const userHistory = StorageService.getHistory(user.uid || '');
+        const userGoals = StorageService.getGoals(user.uid || '');
+        setHistory(userHistory);
+        setGoals(userGoals);
+      }
     } catch (e) {
-      console.error("Error loading local data", e);
+      console.error("Error loading user storage", e);
+    } finally {
+      setLoadingUser(false);
     }
   }, []);
 
@@ -142,15 +129,15 @@ const App: React.FC = () => {
       ratingLabels: RATING_LABELS,
       ResultsDisplay: HollandResultsDisplay,
       calculateResults: (answers: Answers): HollandResults => {
-        const results: HollandResults = { [CategoryKey.R]: 0, [CategoryKey.I]: 0, [CategoryKey.A]: 0, [CategoryKey.S]: 0, [CategoryKey.E]: 0, [CategoryKey.C]: 0 };
+        const res: HollandResults = { [CategoryKey.R]: 0, [CategoryKey.I]: 0, [CategoryKey.A]: 0, [CategoryKey.S]: 0, [CategoryKey.E]: 0, [CategoryKey.C]: 0 };
         for (const category of HOLLAND_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.category_code) {
-              results[question.category_code] += answers[question.id];
+              res[question.category_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     mi: {
@@ -162,15 +149,15 @@ const App: React.FC = () => {
       ratingLabels: MI_RATING_LABELS,
       ResultsDisplay: MIResultsDisplay,
       calculateResults: (answers: Answers): MIResults => {
-        const results: MIResults = { [MICategoryKey.L]: 0, [MICategoryKey.LQ]: 0, [MICategoryKey.VS]: 0, [MICategoryKey.BK]: 0, [MICategoryKey.MU]: 0, [MICategoryKey.IN]: 0, [MICategoryKey.IG]: 0, [MICategoryKey.NT]: 0 };
+        const res: MIResults = { [MICategoryKey.L]: 0, [MICategoryKey.LQ]: 0, [MICategoryKey.VS]: 0, [MICategoryKey.BK]: 0, [MICategoryKey.MU]: 0, [MICategoryKey.IN]: 0, [MICategoryKey.IG]: 0, [MICategoryKey.NT]: 0 };
         for (const category of MI_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.mi_code) {
-              results[question.mi_code] += answers[question.id];
+              res[question.mi_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     grit: {
@@ -184,8 +171,8 @@ const App: React.FC = () => {
       calculateResults: (answers: Answers): GritResults => {
         const effortScores = GRIT_QUIZ_DATA.find(c => c.key === GritGroupKey.Effort)!.questions.map(q => answers[q.id] || 0);
         const interestScores = GRIT_QUIZ_DATA.find(c => c.key === GritGroupKey.Interest)!.questions.map(q => answers[q.id] || 0);
-        const effort = effortScores.reduce((a, b) => a + b, 0) / effortScores.length;
-        const interest = interestScores.reduce((a, b) => a + b, 0) / interestScores.length;
+        const effort = effortScores.length > 0 ? effortScores.reduce((a, b) => a + b, 0) / effortScores.length : 0;
+        const interest = interestScores.length > 0 ? interestScores.reduce((a, b) => a + b, 0) / interestScores.length : 0;
         const grit = (effort + interest) / 2;
         return { grit, effort, interest };
       },
@@ -199,15 +186,15 @@ const App: React.FC = () => {
       ratingLabels: CDB_RATING_LABELS,
       ResultsDisplay: CDIResultsDisplay,
       calculateResults: (answers: Answers): CDBResults => {
-        const results: CDBResults = { [CDBBarrierKey.A]: 0, [CDBBarrierKey.B]: 0, [CDBBarrierKey.C]: 0, [CDBBarrierKey.D]: 0, [CDBBarrierKey.E]: 0 };
+        const res: CDBResults = { [CDBBarrierKey.A]: 0, [CDBBarrierKey.B]: 0, [CDBBarrierKey.C]: 0, [CDBBarrierKey.D]: 0, [CDBBarrierKey.E]: 0 };
         for (const category of CDB_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.cdb_code) {
-              results[question.cdb_code] += answers[question.id];
+              res[question.cdb_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     schein: {
@@ -219,15 +206,15 @@ const App: React.FC = () => {
       ratingLabels: CAREER_ANCHORS_RATING_LABELS,
       ResultsDisplay: CareerAnchorsResultsDisplay,
       calculateResults: (answers: Answers): CareerAnchorResults => {
-        const results: CareerAnchorResults = { TF: 0, GM: 0, AU: 0, SE: 0, EC: 0, SV: 0, PC: 0, LS: 0 };
+        const res: CareerAnchorResults = { TF: 0, GM: 0, AU: 0, SE: 0, EC: 0, SV: 0, PC: 0, LS: 0 };
         for (const category of CAREER_ANCHORS_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.anchor_code) {
-              results[question.anchor_code] += answers[question.id];
+              res[question.anchor_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     'work-values': {
@@ -239,15 +226,15 @@ const App: React.FC = () => {
       ratingLabels: WORK_VALUES_RATING_LABELS,
       ResultsDisplay: WorkValuesResultsDisplay,
       calculateResults: (answers: Answers): WorkValuesResults => {
-        const results: WorkValuesResults = { ACH: 0, SEC: 0, AUT: 0, INF: 0, ALT: 0, AES: 0 };
+        const res: WorkValuesResults = { ACH: 0, SEC: 0, AUT: 0, INF: 0, ALT: 0, AES: 0 };
         for (const category of WORK_VALUES_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.work_value_code) {
-              results[question.work_value_code] += answers[question.id];
+              res[question.work_value_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     crs: {
@@ -338,7 +325,7 @@ const App: React.FC = () => {
       ratingLabels: WHEEL_RATING_LABELS,
       ResultsDisplay: WheelOfLifeResultsDisplay,
       calculateResults: (answers: Answers): WheelResults => {
-        const results: WheelResults = {
+        const res: WheelResults = {
           [WheelCategoryKey.CAREER]: 0, [WheelCategoryKey.FINANCE]: 0, [WheelCategoryKey.HEALTH]: 0, [WheelCategoryKey.FAMILY]: 0,
           [WheelCategoryKey.RELATIONSHIP]: 0, [WheelCategoryKey.GROWTH]: 0, [WheelCategoryKey.FUN]: 0, [WheelCategoryKey.SPIRIT]: 0
         };
@@ -347,16 +334,16 @@ const App: React.FC = () => {
         for (const category of WHEEL_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.wheel_code) {
-              results[question.wheel_code] += answers[question.id];
+              res[question.wheel_code] += answers[question.id];
               counts[question.wheel_code] = (counts[question.wheel_code] || 0) + 1;
             }
           }
         }
-        Object.keys(results).forEach(key => {
+        Object.keys(res).forEach(key => {
           const count = counts[key] || 1;
-          results[key as WheelCategoryKey] = results[key as WheelCategoryKey] / count;
+          res[key as WheelCategoryKey] = res[key as WheelCategoryKey] / count;
         });
-        return results;
+        return res;
       },
     },
     'big-five': {
@@ -368,18 +355,18 @@ const App: React.FC = () => {
       ratingLabels: BIG5_RATING_LABELS,
       ResultsDisplay: BigFiveResultsDisplay,
       calculateResults: (answers: Answers): BigFiveResults => {
-        const results: BigFiveResults = {
+        const res: BigFiveResults = {
           [BigFiveCategoryKey.O]: 0, [BigFiveCategoryKey.C]: 0, [BigFiveCategoryKey.E]: 0,
           [BigFiveCategoryKey.A]: 0, [BigFiveCategoryKey.N]: 0
         };
         for (const category of BIG5_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.big_five_code) {
-              results[question.big_five_code] += answers[question.id];
+              res[question.big_five_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
     eq: {
@@ -391,18 +378,18 @@ const App: React.FC = () => {
       ratingLabels: EQ_RATING_LABELS,
       ResultsDisplay: EQResultsDisplay,
       calculateResults: (answers: Answers): EQResults => {
-        const results: EQResults = {
+        const res: EQResults = {
           [EQCategoryKey.SA]: 0, [EQCategoryKey.SR]: 0, [EQCategoryKey.MO]: 0,
           [EQCategoryKey.EM]: 0, [EQCategoryKey.SS]: 0
         };
         for (const category of EQ_QUIZ_DATA) {
           for (const question of category.questions) {
             if (answers[question.id] && question.eq_code) {
-              results[question.eq_code] += answers[question.id];
+              res[question.eq_code] += answers[question.id];
             }
           }
         }
-        return results;
+        return res;
       },
     },
   }), []);
@@ -410,31 +397,33 @@ const App: React.FC = () => {
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('pathai:v2:theme', theme);
   }, [theme]);
-
-  useEffect(() => {
-    localStorage.setItem('quizHistory', JSON.stringify(history));
-  }, [history]);
-
-  useEffect(() => {
-    localStorage.setItem('goals', JSON.stringify(goals));
-  }, [goals]);
 
   // Auth Handling
   const handleLogin = (data: UserData) => {
     setUserData(data);
-    localStorage.setItem('localUserProfile', JSON.stringify(data));
+    StorageService.saveUserProfile(data);
+    if (data.uid) {
+      setHistory(StorageService.getHistory(data.uid));
+      setGoals(StorageService.getGoals(data.uid));
+    }
   };
 
-  const handleLogout = async () => {
-    localStorage.removeItem('localUserProfile');
-    window.location.reload(); // Simple reload to reset state
+  const handleLogout = () => {
+    StorageService.purgeSession();
+    setUserData(null);
+    setHistory([]);
+    setGoals([]);
+    setResults(null);
+    setHistorySnapshotUser(null);
+    setSelectedQuizId(null);
+    setCurrentView('home');
   };
 
   const completedStages = useMemo(() => {
     const stage1 = ['holland', 'mi', 'big-five', 'eq', 'context'];
-    const stage2 = ['wheel', 'cdb', 'work-values', 'career-anchors'];
+    const stage2 = ['wheel', 'cdb', 'work-values', 'schein'];
     const stage3 = ['grit', 'crs', 'gms'];
 
     return {
@@ -456,6 +445,7 @@ const App: React.FC = () => {
     setSelectedQuizId(null);
     setQuizState({ currentStep: 0, answers: {} });
     setResults(null);
+    setHistorySnapshotUser(null);
   };
 
   const handleGoHome = () => {
@@ -493,26 +483,28 @@ const App: React.FC = () => {
 
   // Finish Quiz and View Results
   const handleFinishQuiz = () => {
-    const config = QUIZ_CONFIGS[selectedQuizId!];
+    if (!selectedQuizId) return;
+    const config = QUIZ_CONFIGS[selectedQuizId as keyof typeof QUIZ_CONFIGS];
+    if (!config) return;
+
     const calculatedResults = config.calculateResults(quizState.answers);
     setResults(calculatedResults);
+    setHistorySnapshotUser(null);
 
-    // Save to Firestore and State
-    // Save to LocalStorage
-    if (userData) {
+    if (userData?.uid) {
       const newHistoryEntry: QuizHistoryEntry = {
         id: `${selectedQuizId}-${Date.now()}`,
-        quizId: selectedQuizId!,
+        quizId: selectedQuizId,
         quizTitle: config.title,
         timestamp: Date.now(),
-        userData: userData,
+        userData: { ...userData },
         results: calculatedResults,
         answers: quizState.answers,
       };
 
       const updatedHistory = [newHistoryEntry, ...history];
       setHistory(updatedHistory);
-      localStorage.setItem('quizHistory', JSON.stringify(updatedHistory));
+      StorageService.saveHistory(userData.uid, updatedHistory);
     }
     setCurrentView('results');
   };
@@ -521,49 +513,58 @@ const App: React.FC = () => {
   const handleViewGoals = () => setCurrentView('goals');
   const handleViewDecisionDashboard = () => setCurrentView('decision-dashboard');
 
+  // Read-only history viewing: Never mutate active userData state
   const handleViewResultFromHistory = (entry: QuizHistoryEntry) => {
     resetQuiz();
     setSelectedQuizId(entry.quizId);
     setResults(entry.results);
-    setUserData(entry.userData); // Ensure legacy data works
+    setHistorySnapshotUser(entry.userData || userData);
     setQuizState({ currentStep: 0, answers: entry.answers });
     setCurrentView('results');
   };
 
-  const handleDeleteResult = async (id: string) => {
+  const handleDeleteResult = (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa kết quả này?')) {
       const updated = history.filter(entry => entry.id !== id);
       setHistory(updated);
-      localStorage.setItem('quizHistory', JSON.stringify(updated));
+      if (userData?.uid) {
+        StorageService.saveHistory(userData.uid, updated);
+      }
     }
   };
 
-  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'createdAt' | 'status'>) => {
-    const newGoalBase = {
+  const handleAddGoal = (goal: Omit<Goal, 'id' | 'createdAt' | 'status'>) => {
+    const newGoalBase: Goal = {
       ...goal,
       id: `goal-${Date.now()}`,
       createdAt: Date.now(),
-      status: 'todo' as const,
+      status: 'todo',
     };
 
     const updatedGoals = [newGoalBase, ...goals];
     setGoals(updatedGoals);
-    localStorage.setItem('goals', JSON.stringify(updatedGoals));
+    if (userData?.uid) {
+      StorageService.saveGoals(userData.uid, updatedGoals);
+    }
   };
 
-  const handleUpdateGoal = async (updatedGoal: Goal) => {
+  const handleUpdateGoal = (updatedGoal: Goal) => {
     const updatedGoals = goals.map(g => g.id === updatedGoal.id ? updatedGoal : g);
     setGoals(updatedGoals);
-    localStorage.setItem('goals', JSON.stringify(updatedGoals));
+    if (userData?.uid) {
+      StorageService.saveGoals(userData.uid, updatedGoals);
+    }
   };
 
-  const handleDeleteGoal = async (id: string) => {
+  const handleDeleteGoal = (id: string) => {
     const updatedGoals = goals.filter(g => g.id !== id);
     setGoals(updatedGoals);
-    localStorage.setItem('goals', JSON.stringify(updatedGoals));
+    if (userData?.uid) {
+      StorageService.saveGoals(userData.uid, updatedGoals);
+    }
   };
 
-  const currentQuizConfig = selectedQuizId ? QUIZ_CONFIGS[selectedQuizId] : null;
+  const currentQuizConfig = selectedQuizId ? QUIZ_CONFIGS[selectedQuizId as keyof typeof QUIZ_CONFIGS] : null;
 
   // Render Logic
   if (loadingUser) {
@@ -571,33 +572,31 @@ const App: React.FC = () => {
   }
 
   if (!userData) {
-    // Should generally not happen due to auto-guest login, but keeps type safety
     return <Login onLogin={handleLogin} />;
   }
 
   const renderContent = () => {
     switch (currentView) {
-      case 'quiz':
-        if (!currentQuizConfig) return <HomePage onSelectQuiz={handleSelectQuiz} onOpenGuide={() => setGuideModalOpen(true)} onOpenQuizInfo={handleOpenQuizInfo} />;
+      case 'quiz': {
+        if (!currentQuizConfig) {
+          return <HomePage onSelectQuiz={handleSelectQuiz} onOpenGuide={() => setGuideModalOpen(true)} onOpenQuizInfo={handleOpenQuizInfo} />;
+        }
         const { steps, introduction, quizData, ratingOptions, ratingLabels } = currentQuizConfig;
-        const isResultsStep = quizState.currentStep === steps.length - 1; // Last Step is now pure loading/calculation transition
+        const isResultsStep = quizState.currentStep === steps.length - 1;
 
         if (quizState.currentStep === 0) {
           return <QuizIntroduction {...introduction} onNext={handleNextStep} />;
         }
 
-        // Removed intermediate RegistrationForm step since user is already logged in
-
         if (isResultsStep) {
-          return <div className="text-center py-40"><LoadingSpinner /></div>
+          return <div className="text-center py-40"><LoadingSpinner /></div>;
         }
 
         const categoryIndex = quizState.currentStep - 1;
         const category = quizData[categoryIndex];
-        const allAnswered = category && category.questions.every((q: { id: string | number; }) => quizState.answers[q.id] !== undefined);
+        const allAnswered = category && category.questions.every((q: { id: string | number }) => quizState.answers[q.id] !== undefined);
         const isLastQuizStep = quizState.currentStep === quizData.length;
 
-        // Skip registration step logic (previously at steps.length - 2)
         const onStepComplete = isLastQuizStep ? handleFinishQuiz : handleNextStep;
 
         return (
@@ -613,8 +612,9 @@ const App: React.FC = () => {
             ratingLabels={ratingLabels}
           />
         );
+      }
 
-      case 'results':
+      case 'results': {
         if (!currentQuizConfig || !results) {
           handleGoHome();
           return null;
@@ -627,7 +627,7 @@ const App: React.FC = () => {
               answers={quizState.answers}
               onGoHome={handleGoHome}
               theme={theme}
-              userData={userData}
+              userData={historySnapshotUser || userData}
               onBackToHistory={history.length > 0 ? handleViewHistory : undefined}
               quizId={selectedQuizId!}
               quizTitle={currentQuizConfig.title}
@@ -635,6 +635,7 @@ const App: React.FC = () => {
             />
           </Suspense>
         );
+      }
 
       case 'history':
         return <HistoryPage history={history} onViewResult={handleViewResultFromHistory} onDeleteResult={handleDeleteResult} onGoHome={handleGoHome} />;
@@ -668,7 +669,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-700`}>
+    <div className="min-h-screen flex flex-col font-sans transition-colors duration-700">
       <Header
         currentStep={currentQuizConfig ? quizState.currentStep : 0}
         steps={currentQuizConfig?.steps || []}
@@ -694,7 +695,7 @@ const App: React.FC = () => {
         <QuizInfoModal
           isOpen={isQuizInfoModalOpen}
           onClose={() => setQuizInfoModalOpen(false)}
-          introduction={QUIZ_CONFIGS[infoQuizId]?.introduction}
+          introduction={QUIZ_CONFIGS[infoQuizId as keyof typeof QUIZ_CONFIGS]?.introduction}
         />
       )}
       <FloatingShare />

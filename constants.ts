@@ -114,8 +114,7 @@ export const STEPS: Step[] = [
   { id: 4, title: 'Nhóm S' },
   { id: 5, title: 'Nhóm E' },
   { id: 6, title: 'Nhóm C' },
-  { id: 7, title: 'Đăng ký' },
-  { id: 8, title: 'Kết quả' },
+  { id: 7, title: 'Kết quả' },
 ];
 
 export const HOLLAND_INTRODUCTION: Introduction = {

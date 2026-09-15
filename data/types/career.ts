@@ -1,6 +1,8 @@
 // Career Taxonomy — The career universe for Vietnamese students
 // Career Hypothesis — Not "matching" but "hypotheses to test"
 
+import type { ConfidenceLevel } from './student';
+
 export interface CareerFamily {
   id: string;
   name: string;
@@ -27,5 +29,3 @@ export interface CareerHypothesis {
   createdAt: number;
   updatedAt: number;
 }
-
-export type ConfidenceLevel = 'low' | 'medium' | 'high';

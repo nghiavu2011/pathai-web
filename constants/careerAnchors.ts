@@ -22,8 +22,7 @@ export const CAREER_ANCHORS_STEPS: Step[] = [
   { id: 6, title: 'Phần 6' },
   { id: 7, title: 'Phần 7' },
   { id: 8, title: 'Phần 8' },
-  { id: 9, title: 'Đăng ký' },
-  { id: 10, title: 'Kết quả' },
+  { id: 9, title: 'Kết quả' },
 ];
 
 export const CAREER_ANCHORS_INTRODUCTION: Introduction = {

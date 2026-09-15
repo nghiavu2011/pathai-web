@@ -17,8 +17,7 @@ export const WORK_VALUES_STEPS: Step[] = [
   { id: 4, title: 'Nhóm 4' },
   { id: 5, title: 'Nhóm 5' },
   { id: 6, title: 'Nhóm 6' },
-  { id: 7, title: 'Đăng ký' },
-  { id: 8, title: 'Kết quả' },
+  { id: 7, title: 'Kết quả' },
 ];
 
 export const WORK_VALUES_INTRODUCTION: Introduction = {
