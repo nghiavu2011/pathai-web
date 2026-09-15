@@ -6,15 +6,12 @@ export const usePdfGenerator = (fileName: string) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // This internal function will handle the common logic of creating the PDF
+  // This internal function handles rendering and capturing the PDF
   const createPdf = async (): Promise<jsPDF | null> => {
     if (!contentRef.current) return null;
 
-    // Add capturing class
     document.body.classList.add('is-capturing');
-
-    // UI update before canvas generation
-    await new Promise(resolve => setTimeout(resolve, 500)); // Increased wait time for stability
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
       const element = contentRef.current;
@@ -22,11 +19,9 @@ export const usePdfGenerator = (fileName: string) => {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-        // ignoreElements: (element) => element.tagName === 'BUTTON', // Optional: ignore if needed
+        backgroundColor: '#ffffff', // Always white for clean print-ready PDF
       });
 
-      // Remove capturing class
       document.body.classList.remove('is-capturing');
 
       const imgData = canvas.toDataURL('image/png');
@@ -46,7 +41,6 @@ export const usePdfGenerator = (fileName: string) => {
     }
   };
 
-  // Function to download the PDF
   const generatePdf = async () => {
     if (isGenerating) return;
     setIsGenerating(true);
@@ -54,9 +48,9 @@ export const usePdfGenerator = (fileName: string) => {
     try {
       const pdf = await createPdf();
       if (pdf) {
-        pdf.save(`${fileName.replace(/ /g, '_')}.pdf`);
+        pdf.save(`${fileName.replace(/[\s/\\?%*:|"<>]/g, '_')}.pdf`);
       } else {
-        throw new Error("PDF instance creation failed.");
+        throw new Error("PDF generation failed.");
       }
     } catch (error) {
       console.error("Error generating PDF for download:", error);
@@ -66,11 +60,10 @@ export const usePdfGenerator = (fileName: string) => {
     }
   };
 
-  // Function to share the PDF
   const sharePdf = async () => {
     if (isGenerating) return;
     if (!navigator.share || !navigator.canShare) {
-      alert("Tính năng chia sẻ không được hỗ trợ trên trình duyệt này.");
+      alert("Tính năng chia sẻ không được hỗ trợ trên trình duyệt này. Hãy chọn Tải báo cáo PDF.");
       return;
     }
 
@@ -83,25 +76,22 @@ export const usePdfGenerator = (fileName: string) => {
       }
 
       const pdfBlob = pdf.output('blob');
-      const pdfFile = new File([pdfBlob], `${fileName.replace(/ /g, '_')}.pdf`, { type: 'application/pdf' });
+      const pdfFile = new File([pdfBlob], `${fileName.replace(/[\s/\\?%*:|"<>]/g, '_')}.pdf`, { type: 'application/pdf' });
 
       const shareData = {
         files: [pdfFile],
-        title: `Kết quả PathAI của ${fileName}`,
-        text: `Đây là báo cáo kết quả trắc nghiệm của tôi từ PathAI.`,
+        title: `Báo cáo PathAI: ${fileName}`,
+        text: `Báo cáo định hướng nghề nghiệp và học tập từ PathAI.`,
       };
 
       if (navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback for cases where files might not be shareable (e.g., some desktop browsers)
-        alert("Trình duyệt không hỗ trợ chia sẻ file PDF. Vui lòng thử tải về.");
+        alert("Trình duyệt không hỗ trợ chia sẻ trực tiếp file PDF. Vui lòng thử tải về máy.");
       }
-
     } catch (error) {
-      // Don't show an alert if the user cancels the share dialog
       if (error instanceof DOMException && error.name === 'AbortError') {
-        console.log('Share was cancelled by the user.');
+        // User closed share dialog
       } else {
         console.error("Error sharing PDF:", error);
         alert("Đã có lỗi xảy ra khi chia sẻ file PDF. Vui lòng thử lại.");
