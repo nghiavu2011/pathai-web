@@ -13,11 +13,17 @@ export const AdminInsightsView: React.FC<AdminInsightsViewProps> = ({ onGoHome }
   const [pinError, setPinError] = useState(false);
   const [insights, setInsights] = useState<AggregatedInsights | null>(null);
 
+  const [timeRange, setTimeRange] = useState<'all' | '7d' | '24h'>('all');
+  const [excludeSpeedRuns, setExcludeSpeedRuns] = useState<boolean>(true);
+
   useEffect(() => {
     if (isUnlocked) {
-      setInsights(TelemetryService.getAggregatedInsights());
+      setInsights(TelemetryService.getAggregatedInsights({
+        timeRange,
+        excludeSpeedRuns
+      }));
     }
-  }, [isUnlocked]);
+  }, [isUnlocked, timeRange, excludeSpeedRuns]);
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +113,7 @@ export const AdminInsightsView: React.FC<AdminInsightsViewProps> = ({ onGoHome }
             Bảng Đo Lường Hiệu Quả & Thói Quen Người Dùng
           </h1>
           <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Dữ liệu thống kê phi định danh thu thập từ các phiên sử dụng, hỗ trợ quyết định nâng cấp tính năng.
+            Trung tâm quan sát hành vi, chất lượng học tập, tâm lý gia đình và phễu chuyển đổi cho học sinh lớp 9–12.
           </p>
         </div>
         <div className="flex gap-3 shrink-0">
@@ -126,6 +132,43 @@ export const AdminInsightsView: React.FC<AdminInsightsViewProps> = ({ onGoHome }
         </div>
       </div>
 
+      {/* Filter Toolbar (Time Range & Speed-run Cleaner) */}
+      <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-700 dark:text-slate-300">⏱️ Phạm vi thời gian:</span>
+          <div className="inline-flex bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            {(['all', '7d', '24h'] as const).map(range => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                  timeRange === range
+                    ? 'bg-sage-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                {range === 'all' ? 'Toàn thời gian' : range === '7d' ? '7 ngày qua' : '24 giờ qua'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-slate-700 dark:text-slate-300 font-medium">
+            <input
+              type="checkbox"
+              checked={excludeSpeedRuns}
+              onChange={e => setExcludeSpeedRuns(e.target.checked)}
+              className="w-4 h-4 rounded text-sage-600 focus:ring-sage-500 border-slate-300 dark:border-slate-600"
+            />
+            <span>🛡️ Lọc bài làm siêu tốc / đánh bừa (&lt; 25s)</span>
+          </label>
+          <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+            {insights.dataQuality.validResponseRatePct}% bài làm hợp lệ
+          </span>
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-2">
@@ -141,6 +184,9 @@ export const AdminInsightsView: React.FC<AdminInsightsViewProps> = ({ onGoHome }
           <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
             <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${insights.completionRate}%` }}></div>
           </div>
+          <p className="text-[11px] text-slate-400">
+            Thời gian làm bài TB: ~{Math.round(insights.dataQuality.averageDurationSeconds / 60)} phút
+          </p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-2">
@@ -176,6 +222,151 @@ export const AdminInsightsView: React.FC<AdminInsightsViewProps> = ({ onGoHome }
             <span className="text-xs text-slate-500">({insights.totalEvents} sự kiện)</span>
           </div>
           <p className="text-[11px] text-slate-400">Đo lường trên trình duyệt không dùng cookie xâm nhập</p>
+        </div>
+      </div>
+
+      {/* PHỄU RƠI RỤNG (DROP-OFF FUNNEL) */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/80 pb-4">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>📉</span> Phễu Chuyển Đổi & Điểm Rơi Trải Nghiệm (Drop-Off Funnel)
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Phát hiện chính xác bước nào học sinh có xu hướng chùn bước để cải tiến câu chữ và giao diện.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-full text-xs font-semibold shrink-0">
+            <span>⚠️ Điểm rơi lớn:</span> {insights.funnel.biggestDropOffPoint}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {insights.funnel.steps.map((st, i) => (
+            <div key={i} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/60 dark:border-slate-800 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-700 dark:text-slate-200">{st.stepName}</span>
+                <span className="font-extrabold text-sage-600 dark:text-sage-400 text-sm">{st.pct}%</span>
+              </div>
+              <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    i === 0 ? 'bg-indigo-500' : i === 1 ? 'bg-blue-500' : i === 2 ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                  style={{ width: `${st.pct}%` }}
+                ></div>
+              </div>
+              <p className="text-[11px] text-slate-400 text-right">{st.count} lượt tham gia</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CHỈ SỐ HƯỚNG NGHIỆP GDPT 2018 & CHỈ SỐ TÂM LÝ GIA ĐÌNH */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Panel 1: GDPT 2018 & Career Risk */}
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+              <span>🎯</span> Chỉ Số Hướng Nghiệp & Rủi Ro Chọn Tổ Hợp (GDPT 2018)
+            </h3>
+            <span className="text-[11px] text-slate-400">Giáo dục phổ thông</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 bg-amber-50/80 dark:bg-slate-900 rounded-2xl border border-amber-200/70 dark:border-slate-800 space-y-1">
+              <span className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold block">
+                Nguy cơ Đóng Cửa Cơ Hội Cao
+              </span>
+              <span className="text-2xl font-black text-amber-600 dark:text-amber-400">
+                {insights.careerAndEdu.doorClosingHighRiskPct}%
+              </span>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                Học sinh vô tình khóa &gt;60% ngành yêu thích khi chọn môn sớm.
+              </p>
+            </div>
+
+            <div className="p-3 bg-rose-50/80 dark:bg-slate-900 rounded-2xl border border-rose-200/70 dark:border-slate-800 space-y-1">
+              <span className="text-[11px] text-rose-800 dark:text-rose-300 font-semibold block">
+                Lệch Pha Sở Thích vs Môn Học
+              </span>
+              <span className="text-2xl font-black text-rose-600 dark:text-rose-400">
+                {insights.careerAndEdu.academicMismatchPct}%
+              </span>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                Sở thích nhóm Kỹ thuật/Tự nhiên nhưng chọn tổ hợp KHXH và ngược lại.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+              Top Nhóm Ngành Được Quan Tâm Nhất:
+            </h4>
+            <div className="space-y-2">
+              {insights.careerAndEdu.topCareerClusters.map((cluster, i) => (
+                <div key={i} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-300">{cluster.name}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-100">{cluster.pct}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-sage-500 h-full rounded-full" style={{ width: `${cluster.pct}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Panel 2: Psychology & Family Bridge */}
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+              <span>🌱</span> Chỉ Số Tâm Lý, Đồng Hành Gia Đình & An Toàn
+            </h3>
+            <span className="text-[11px] text-slate-400">Tâm lý học đường</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 bg-emerald-50/80 dark:bg-slate-900 rounded-2xl border border-emerald-200/70 dark:border-slate-800 space-y-1">
+              <span className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold block">
+                Cầu Nối Đối Thoại Gia Đình
+              </span>
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                {insights.familyAndSafety.familyEngagementRatePct}%
+              </span>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                Học sinh sử dụng gợi ý đối thoại cùng cha mẹ sau khi làm bài.
+              </p>
+            </div>
+
+            <div className="p-3 bg-indigo-50/80 dark:bg-slate-900 rounded-2xl border border-indigo-200/70 dark:border-slate-800 space-y-1">
+              <span className="text-[11px] text-indigo-800 dark:text-indigo-300 font-semibold block">
+                Suy Ngẫm Giá Trị Bản Thân
+              </span>
+              <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                {insights.familyAndSafety.reflectionViews}
+              </span>
+              <p className="text-[10px] text-slate-500 leading-tight">
+                Lượt học sinh tìm hiểu tính cách văn hóa và động lực nội tại.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                <span>🛡️</span> Tín Hiệu An Toàn Học Đường & Hotline:
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                {insights.familyAndSafety.hotlineClicks === 0 ? 'Bình thường (0 cuộc gọi khẩn)' : `${insights.familyAndSafety.hotlineClicks} tín hiệu`}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Theo dõi việc truy cập các kênh can thiệp khủng hoảng (Tổng đài 111, Đường dây Ngày Mai 096 306 1414) để bảo vệ sức khỏe tinh thần và lòng tự tôn của học sinh.
+            </p>
+          </div>
         </div>
       </div>
 

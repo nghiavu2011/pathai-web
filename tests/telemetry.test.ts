@@ -153,4 +153,40 @@ describe('PATHAI TelemetryService & Zero PII Analytics Suite', () => {
       expect(rawFeedback.toLowerCase().includes(term.toLowerCase())).toBe(false);
     }
   });
+
+  it('calculates multi-disciplinary funnel and speed-run filtering correctly', () => {
+    // 1 standard completion (120s) and 1 speed-run completion (10s)
+    TelemetryService.trackEvent('quiz_start', { quizId: 'holland' });
+    TelemetryService.trackEvent('quiz_step_advance', { step: 3 });
+    TelemetryService.trackEvent('quiz_complete', { quizId: 'holland', durationSeconds: 120, isSpeedRun: false });
+
+    TelemetryService.trackEvent('quiz_start', { quizId: 'grit' });
+    TelemetryService.trackEvent('quiz_complete', { quizId: 'grit', durationSeconds: 10, isSpeedRun: true });
+
+    // Without speed-run filter: 2 completions
+    const allInsights = TelemetryService.getAggregatedInsights({ excludeSpeedRuns: false });
+    expect(allInsights.dataQuality.speedRunCount).toBe(1);
+    expect(allInsights.quizCompletions).toBe(2);
+
+    // With speed-run filter: 1 completion
+    const filteredInsights = TelemetryService.getAggregatedInsights({ excludeSpeedRuns: true });
+    expect(filteredInsights.quizCompletions).toBe(1);
+
+    // Funnel steps
+    expect(filteredInsights.funnel.steps.length).toBe(4);
+    expect(filteredInsights.funnel.steps[0].pct).toBe(100);
+  });
+
+  it('tracks family bridge, reflection, and hotline safety events', () => {
+    TelemetryService.trackEvent('family_bridge_open', { grade: 'grade_9' });
+    TelemetryService.trackEvent('reflection_open', { grade: 'grade_9' });
+    TelemetryService.trackEvent('hotline_click', { hotline: '111' });
+    TelemetryService.trackEvent('door_closing_view', { grade: 'grade_9' });
+
+    const insights = TelemetryService.getAggregatedInsights();
+    expect(insights.familyAndSafety.familyBridgeViews).toBeGreaterThanOrEqual(1);
+    expect(insights.familyAndSafety.reflectionViews).toBeGreaterThanOrEqual(1);
+    expect(insights.familyAndSafety.hotlineClicks).toBe(1);
+    expect(insights.careerAndEdu.doorClosingViews).toBeGreaterThanOrEqual(1);
+  });
 });

@@ -149,6 +149,7 @@ const App: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isDemographicModalOpen, setDemographicModalOpen] = useState(false);
   const [pendingQuizId, setPendingQuizId] = useState<string | null>(null);
+  const [quizStartTime, setQuizStartTime] = useState<number>(Date.now());
 
   // HTML5 History & URL routing synchronization
   const navigateTo = (path: string) => {
@@ -515,7 +516,12 @@ const App: React.FC = () => {
   // Step Navigation
 
   const handleNextStep = () => {
-    setQuizState(prev => ({ ...prev, currentStep: prev.currentStep + 1 }));
+    const nextStep = quizState.currentStep + 1;
+    setQuizState(prev => ({ ...prev, currentStep: nextStep }));
+    TelemetryService.trackEvent('quiz_step_advance', {
+      quizId: selectedQuizId || '',
+      step: nextStep
+    });
   };
 
   const handleBackStep = () => {
@@ -539,6 +545,7 @@ const App: React.FC = () => {
   const proceedWithQuiz = (quizId: string) => {
     resetQuiz();
     setSelectedQuizId(quizId);
+    setQuizStartTime(Date.now());
     TelemetryService.trackEvent('quiz_start', { quizId });
     navigateTo(`/quiz/${quizId}`);
   };
@@ -593,7 +600,14 @@ const App: React.FC = () => {
     const calculatedResults = config.calculateResults(quizState.answers);
     setResults(calculatedResults);
     setHistorySnapshotUser(null);
-    TelemetryService.trackEvent('quiz_complete', { quizId: selectedQuizId });
+    
+    const durationSeconds = Math.max(1, Math.round((Date.now() - quizStartTime) / 1000));
+    const isSpeedRun = durationSeconds < 25;
+    TelemetryService.trackEvent('quiz_complete', {
+      quizId: selectedQuizId,
+      durationSeconds,
+      isSpeedRun
+    });
 
     const activeUser = userData || {
       fullName: 'Học sinh Khám phá',

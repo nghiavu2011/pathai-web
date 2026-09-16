@@ -132,8 +132,16 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
   useEffect(() => {
     if (viewMode === 'guided') {
       TelemetryService.trackEvent('dashboard_step_view', { step: `step_${currentStep}`, grade: selectedGrade });
+      if (currentStep === 4) {
+        TelemetryService.trackEvent('family_bridge_open', { grade: selectedGrade, context: 'guided_step_4' });
+      }
     } else {
       TelemetryService.trackEvent('dashboard_step_view', { tab: activeTab, grade: selectedGrade });
+      if (activeTab === 'scenario') {
+        TelemetryService.trackEvent('door_closing_view', { grade: selectedGrade });
+      } else if (activeTab === 'cultural') {
+        TelemetryService.trackEvent('reflection_open', { grade: selectedGrade });
+      }
     }
   }, [viewMode, currentStep, activeTab, selectedGrade]);
 

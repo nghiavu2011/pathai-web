@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { TelemetryService } from '../services/telemetryService';
 
 export type TrustTab = 'methodology' | 'ai-safety' | 'privacy' | 'terms' | 'data-sources';
 
@@ -181,21 +182,33 @@ const TrustPageView: React.FC<TrustPageViewProps> = ({ activeTab, onSelectTab, o
               Khi hệ thống phát hiện các tín hiệu liên quan đến tự hại, khủng hoảng tinh thần nghiêm trọng hoặc bạo lực học đường, Trợ lý AI sẽ ngay lập tức <strong>dừng toàn bộ hoạt động tham vấn nghề nghiệp</strong> và kích hoạt hộp thoại hỗ trợ khẩn cấp với các kênh liên lạc chính thức:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center">
-                <div className="text-2xl mb-1">🛡️</div>
-                <div className="font-bold text-rose-700 dark:text-rose-400">Tổng Đài Trẻ Em: 111</div>
+              <a
+                href="tel:111"
+                onClick={() => TelemetryService.trackEvent('hotline_click', { hotline: '111', name: 'Tổng Đài Trẻ Em' })}
+                className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center hover:shadow-md transition-all block group"
+              >
+                <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">🛡️</div>
+                <div className="font-bold text-rose-700 dark:text-rose-400 group-hover:underline">Tổng Đài Trẻ Em: 111</div>
                 <div className="text-xs text-slate-500 mt-1">24/7 • Miễn cước gọi toàn quốc</div>
-              </div>
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center">
-                <div className="text-2xl mb-1">💚</div>
-                <div className="font-bold text-rose-700 dark:text-rose-400">Đường Dây Ngày Mai: 096 306 1414</div>
+              </a>
+              <a
+                href="tel:0963061414"
+                onClick={() => TelemetryService.trackEvent('hotline_click', { hotline: '0963061414', name: 'Đường Dây Ngày Mai' })}
+                className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center hover:shadow-md transition-all block group"
+              >
+                <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">💚</div>
+                <div className="font-bold text-rose-700 dark:text-rose-400 group-hover:underline">Đường Dây Ngày Mai: 096 306 1414</div>
                 <div className="text-xs text-slate-500 mt-1">Hỗ trợ tâm lý & khủng hoảng</div>
-              </div>
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center">
-                <div className="text-2xl mb-1">🚑</div>
-                <div className="font-bold text-rose-700 dark:text-rose-400">Cấp Cứu Y Tế: 115</div>
+              </a>
+              <a
+                href="tel:115"
+                onClick={() => TelemetryService.trackEvent('hotline_click', { hotline: '115', name: 'Cấp Cứu Y Tế' })}
+                className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-200 dark:border-rose-800 text-center hover:shadow-md transition-all block group"
+              >
+                <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">🚑</div>
+                <div className="font-bold text-rose-700 dark:text-rose-400 group-hover:underline">Cấp Cứu Y Tế: 115</div>
                 <div className="text-xs text-slate-500 mt-1">Trợ giúp y tế khẩn cấp</div>
-              </div>
+              </a>
             </div>
           </section>
 
