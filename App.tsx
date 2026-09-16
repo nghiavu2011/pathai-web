@@ -64,6 +64,9 @@ import Grade9DecisionDashboard from './components/dashboard/Grade9DecisionDashbo
 
 import TrustPageView, { TrustTab } from './components/TrustPageView';
 import NotFoundView from './components/NotFoundView';
+import DemographicModal from './components/shared/DemographicModal';
+import AdminInsightsView from './components/dashboard/AdminInsightsView';
+import { TelemetryService } from './services/telemetryService';
 
 const HollandResultsDisplay = React.lazy(() => import('./components/holland/HollandResultsDisplay'));
 const MIResultsDisplay = React.lazy(() => import('./components/multiple-intelligences/MIResultsDisplay'));
@@ -78,7 +81,7 @@ const WheelOfLifeResultsDisplay = React.lazy(() => import('./components/wheel-of
 const BigFiveResultsDisplay = React.lazy(() => import('./components/big-five/BigFiveResultsDisplay'));
 const EQResultsDisplay = React.lazy(() => import('./components/eq/EQResultsDisplay'));
 
-type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard' | 'trust' | 'login' | 'not-found';
+type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard' | 'trust' | 'login' | 'admin-insights' | 'not-found';
 
 interface QuizState {
   currentStep: number;
@@ -115,6 +118,9 @@ const parsePath = (pathname: string): { view: View; trustTab?: TrustTab; quizId?
   if (cleanPath === '/decision-dashboard' || cleanPath === '/dashboard') {
     return { view: 'decision-dashboard' };
   }
+  if (cleanPath === '/admin-insights' || cleanPath === '/insights' || cleanPath === '/admin') {
+    return { view: 'admin-insights' };
+  }
   if (cleanPath === '/login' || cleanPath === '/profile') {
     return { view: 'login' };
   }
@@ -141,12 +147,15 @@ const App: React.FC = () => {
 
   const [history, setHistory] = useState<QuizHistoryEntry[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [isDemographicModalOpen, setDemographicModalOpen] = useState(false);
+  const [pendingQuizId, setPendingQuizId] = useState<string | null>(null);
 
   // HTML5 History & URL routing synchronization
   const navigateTo = (path: string) => {
     window.history.pushState({}, '', path);
     const route = parsePath(path);
     setCurrentView(route.view);
+    TelemetryService.trackEvent('page_view', { path, view: route.view });
     if (route.trustTab) {
       setTrustTab(route.trustTab);
     }
@@ -161,6 +170,7 @@ const App: React.FC = () => {
     const handlePopState = () => {
       const route = parsePath(window.location.pathname);
       setCurrentView(route.view);
+      TelemetryService.trackEvent('page_view', { path: window.location.pathname, view: route.view });
       if (route.trustTab) {
         setTrustTab(route.trustTab);
       }
@@ -184,6 +194,8 @@ const App: React.FC = () => {
       if (metaDesc) metaDesc.setAttribute('content', 'PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập và nghề nghiệp, kiểm chứng lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai.');
     } else if (currentView === 'decision-dashboard') {
       document.title = 'Bản đồ Định hướng Lớp 9–12 | PathAI';
+    } else if (currentView === 'admin-insights') {
+      document.title = 'Bảng Quản Trị Insights | PathAI';
     } else if (currentView === 'history') {
       document.title = 'Lịch sử Trắc nghiệm | PathAI';
     } else if (currentView === 'goals') {
@@ -524,10 +536,20 @@ const App: React.FC = () => {
   const handleViewGoals = () => navigateTo('/goals');
   const handleViewDecisionDashboard = () => navigateTo('/decision-dashboard');
 
-  const handleSelectQuiz = (quizId: string) => {
+  const proceedWithQuiz = (quizId: string) => {
     resetQuiz();
     setSelectedQuizId(quizId);
+    TelemetryService.trackEvent('quiz_start', { quizId });
     navigateTo(`/quiz/${quizId}`);
+  };
+
+  const handleSelectQuiz = (quizId: string) => {
+    if (!TelemetryService.hasDemographics() && !TelemetryService.isPrompted()) {
+      setPendingQuizId(quizId);
+      setDemographicModalOpen(true);
+      return;
+    }
+    proceedWithQuiz(quizId);
   };
 
   const handleOpenQuizInfo = (quizId: string) => {
@@ -571,6 +593,7 @@ const App: React.FC = () => {
     const calculatedResults = config.calculateResults(quizState.answers);
     setResults(calculatedResults);
     setHistorySnapshotUser(null);
+    TelemetryService.trackEvent('quiz_complete', { quizId: selectedQuizId });
 
     const activeUser = userData || {
       fullName: 'Học sinh Khám phá',
@@ -755,6 +778,9 @@ const App: React.FC = () => {
           />
         );
 
+      case 'admin-insights':
+        return <AdminInsightsView onGoHome={handleGoHome} />;
+
       case 'home':
       default:
         return (
@@ -814,6 +840,23 @@ const App: React.FC = () => {
           introduction={QUIZ_CONFIGS[infoQuizId as keyof typeof QUIZ_CONFIGS]?.introduction}
         />
       )}
+      <DemographicModal
+        isOpen={isDemographicModalOpen}
+        onClose={() => {
+          setDemographicModalOpen(false);
+          if (pendingQuizId) {
+            proceedWithQuiz(pendingQuizId);
+            setPendingQuizId(null);
+          }
+        }}
+        onCompleted={() => {
+          setDemographicModalOpen(false);
+          if (pendingQuizId) {
+            proceedWithQuiz(pendingQuizId);
+            setPendingQuizId(null);
+          }
+        }}
+      />
       <FloatingShare />
       <PrivacyConsent />
     </div>

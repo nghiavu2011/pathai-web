@@ -230,6 +230,18 @@ const TrustPageView: React.FC<TrustPageViewProps> = ({ activeTab, onSelectTab, o
               Đối với người dùng trong độ tuổi học sinh (Lớp 9–12), chúng tôi khuyến khích sự đồng hành và giám sát của cha mẹ hoặc người giám hộ hợp pháp khi tham gia xây dựng kế hoạch chọn trường, chọn ngành.
             </p>
           </section>
+
+          <section className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white font-display">3. Đo Lường Thống Kê Hành Vi & Khảo Sát Ẩn Danh (Zero PII)</h2>
+            <p>
+              Nhằm phát hiện điểm nghẽn trải nghiệm người dùng (drop-off), đánh giá độ hữu ích của công cụ (CSAT) và nghiên cứu bức tranh hướng nghiệp theo từng tỉnh thành, PathAI thực hiện thống kê ẩn danh:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-400">
+              <li><strong>Không thu thập PII:</strong> Tuyệt đối không thu thập Họ tên, Số điện thoại, Email, Địa chỉ nhà, hoặc Tọa độ GPS chính xác.</li>
+              <li><strong>Khảo sát tự nguyện 15 giây:</strong> Khối lớp (9–12), Tỉnh/thành phố và Giới tính được cung cấp hoàn toàn tự nguyện với tùy chọn Bỏ qua bất kỳ lúc nào.</li>
+              <li><strong>Mục đích phi thương mại:</strong> Dữ liệu chỉ dùng để cải tiến tính năng tư vấn, tối ưu hóa giao diện và phục vụ nghiên cứu khoa học giáo dục.</li>
+            </ul>
+          </section>
         </article>
       )}
 

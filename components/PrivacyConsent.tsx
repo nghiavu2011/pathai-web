@@ -145,6 +145,15 @@ const PrivacyConsent: React.FC = () => {
 
               <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
+                  <span>📊</span> Thống kê Ẩn danh Phục vụ Nghiên cứu & Hoàn thiện Trải nghiệm
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Nhằm tối ưu hóa trải nghiệm và nghiên cứu xu hướng hướng nghiệp theo từng vùng miền (tỉnh/thành, nhóm khối lớp), PathAI chỉ thu thập các chỉ số phân tích hoàn toàn ẩn danh (Zero PII: không lưu họ tên, email, số điện thoại hay vị trí GPS cá nhân). Quy trình này tuân thủ đầy đủ Nghị định 13/2023/NĐ-CP và Luật Trẻ em 2016.
+                </p>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
                   <span>🗑️</span> Quyền được lãng quên & Xóa dữ liệu (Right to Erasure)
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">

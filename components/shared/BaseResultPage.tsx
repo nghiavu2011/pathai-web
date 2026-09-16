@@ -9,6 +9,8 @@ import ShareModal from './ShareModal';
 import PdfFooter from './PdfFooter';
 import NewsAndArticles from './NewsAndArticles';
 import { renderMarkdown } from '../../utils/renderMarkdown';
+import MicroFeedback from './MicroFeedback';
+import { TelemetryService } from '../../services/telemetryService';
 
 interface BaseResultPageProps {
   title: string;
@@ -126,7 +128,10 @@ const BaseResultPage: React.FC<BaseResultPageProps> = ({
 
             <div className="flex shadow-2xl rounded-full overflow-hidden">
               <button
-                onClick={generatePdf}
+                onClick={() => {
+                  TelemetryService.trackEvent('export_pdf', { quizId });
+                  generatePdf();
+                }}
                 className={`px-10 py-4 bg-sage-500 hover:bg-sage-600 text-white font-bold transition-all flex items-center gap-3 ${canSharePdf ? 'border-r border-sage-600' : ''}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,6 +148,12 @@ const BaseResultPage: React.FC<BaseResultPageProps> = ({
               )}
             </div>
           </div>
+
+          {/* Micro-Feedback 1-Click Widget */}
+          <MicroFeedback
+            context="quiz_result"
+            title={`Kết quả ${title} có giúp bạn hiểu rõ bản thân hơn không?`}
+          />
 
           <div className="space-y-24">
             <NewsAndArticles searchQuery={newsQuery} title={newsTitle} />

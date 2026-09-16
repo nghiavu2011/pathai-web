@@ -185,6 +185,19 @@ const Footer: React.FC<FooterProps> = ({ onOpenDonationModal, onNavigate }) => {
                         >
                             Miễn trừ trách nhiệm
                         </a>
+                        <a 
+                            href="/admin-insights"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/admin-insights');
+                                }
+                            }}
+                            className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
+                            title="Bảng quản trị phân tích nội bộ (Mã PIN)"
+                        >
+                            📊 Quản trị Insights
+                        </a>
                     </div>
                 </div>
             </div>

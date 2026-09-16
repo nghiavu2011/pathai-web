@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { QuizHistoryEntry, CategoryKey } from '../../types';
 import { CAREER_FAMILIES } from '../../data/careerFamilies';
 import { THPT_SUBJECTS } from '../../data/subjects';
@@ -12,6 +12,8 @@ import AdmissionsExplorer from './AdmissionsExplorer';
 import ExamStrategyView from './ExamStrategyView';
 import ScenarioSimulatorView from './ScenarioSimulatorView';
 import CulturalArchetypeView from './CulturalArchetypeView';
+import MicroFeedback from '../shared/MicroFeedback';
+import { TelemetryService } from '../../services/telemetryService';
 
 interface Grade9DecisionDashboardProps {
   history: QuizHistoryEntry[];
@@ -122,6 +124,18 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
   }, [selectedGrade, targetFamilies]);
 
   const phaseMeta = GRADE_PHASES[selectedGrade];
+
+  useEffect(() => {
+    TelemetryService.trackEvent('dashboard_view', { viewMode, grade: selectedGrade });
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'guided') {
+      TelemetryService.trackEvent('dashboard_step_view', { step: `step_${currentStep}`, grade: selectedGrade });
+    } else {
+      TelemetryService.trackEvent('dashboard_step_view', { tab: activeTab, grade: selectedGrade });
+    }
+  }, [viewMode, currentStep, activeTab, selectedGrade]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-slow-fade pb-16 font-sans">
@@ -1017,8 +1031,14 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
         </div>
       )}
 
+      {/* 1-Click Micro-Feedback Widget */}
+      <MicroFeedback
+        context="decision_dashboard"
+        title="Bản đồ định hướng này có giúp bạn hiểu rõ việc chọn môn và tương lai hơn không?"
+      />
+
       {/* Back Button */}
-      <div className="text-center pt-4">
+      <div className="text-center pt-2">
         <button
           onClick={onGoHome}
           className="px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 text-sm font-medium transition-colors"

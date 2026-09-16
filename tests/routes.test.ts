@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Route parser replica test ensuring exact path routing contract
-type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard' | 'trust' | 'login' | 'not-found';
+type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard' | 'trust' | 'login' | 'admin-insights' | 'not-found';
 type TrustTab = 'methodology' | 'ai-safety' | 'privacy' | 'terms' | 'data-sources';
 
 const parsePath = (pathname: string): { view: View; trustTab?: TrustTab; quizId?: string } => {
@@ -35,6 +35,9 @@ const parsePath = (pathname: string): { view: View; trustTab?: TrustTab; quizId?
   }
   if (cleanPath === '/decision-dashboard' || cleanPath === '/dashboard') {
     return { view: 'decision-dashboard' };
+  }
+  if (cleanPath === '/admin-insights' || cleanPath === '/insights' || cleanPath === '/admin') {
+    return { view: 'admin-insights' };
   }
   if (cleanPath === '/login' || cleanPath === '/profile') {
     return { view: 'login' };
@@ -83,6 +86,12 @@ describe('PATHAI URL Routing, Trust Routes & Crawlability Suite', () => {
       expect(parsePath('/dashboard')).toEqual({ view: 'decision-dashboard' });
       expect(parsePath('/history')).toEqual({ view: 'history' });
       expect(parsePath('/goals')).toEqual({ view: 'goals' });
+    });
+
+    it('correctly maps admin-insights route', () => {
+      expect(parsePath('/admin-insights')).toEqual({ view: 'admin-insights' });
+      expect(parsePath('/insights')).toEqual({ view: 'admin-insights' });
+      expect(parsePath('/admin')).toEqual({ view: 'admin-insights' });
     });
 
     it('correctly maps quiz routes with quizId parameter', () => {
