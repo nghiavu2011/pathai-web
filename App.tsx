@@ -174,6 +174,25 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Update SEO metadata for non-trust views
+  useEffect(() => {
+    if (currentView === 'home') {
+      document.title = 'PathAI | Hướng nghiệp cho học sinh lớp 9–12';
+      let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (canonicalLink) canonicalLink.setAttribute('href', 'https://pathai-web-intro.vercel.app/');
+      let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+      if (metaDesc) metaDesc.setAttribute('content', 'PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập và nghề nghiệp, kiểm chứng lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai.');
+    } else if (currentView === 'decision-dashboard') {
+      document.title = 'Bản đồ Định hướng Lớp 9–12 | PathAI';
+    } else if (currentView === 'history') {
+      document.title = 'Lịch sử Trắc nghiệm | PathAI';
+    } else if (currentView === 'goals') {
+      document.title = 'Mục tiêu Nghề nghiệp | PathAI';
+    } else if (currentView === 'not-found') {
+      document.title = '404 - Không Tìm Thấy Trang | PathAI';
+    }
+  }, [currentView]);
+
   // Load User Data with total namespace isolation
   useEffect(() => {
     try {

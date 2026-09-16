@@ -226,7 +226,7 @@ export const QUIZ_DATA: QuizCategory[] = [
 export const RESULT_DETAILS: Record<CategoryKey, Omit<ResultDetail, 'key'>> = {
   [CategoryKey.R]: {
     name: 'Realistic (Thực tế)',
-    description: 'Bạn là người thực tế, thích làm việc với máy móc, công cụ và có khả năng vận động tốt.',
+    description: 'Bạn có xu hướng thực tế, thích làm việc với máy móc, công cụ và có khả năng vận động tốt.',
     careers: [{ name: 'Kỹ sư cơ khí' }, { name: 'Phi công' }, { name: 'Đầu bếp' }, { name: 'Vận động viên' }],
   },
   [CategoryKey.I]: {
@@ -251,7 +251,7 @@ export const RESULT_DETAILS: Record<CategoryKey, Omit<ResultDetail, 'key'>> = {
   },
   [CategoryKey.C]: {
     name: 'Conventional (Nghiệp vụ)',
-    description: 'Bạn là người cẩn thận, có óc tổ chức, thích làm việc với dữ liệu và theo các quy trình rõ ràng.',
+    description: 'Bạn có xu hướng cẩn thận, có óc tổ chức, thích làm việc với dữ liệu và theo các quy trình rõ ràng.',
     careers: [{ name: 'Kế toán' }, { name: 'Thư ký' }, { name: 'Chuyên viên phân tích tài chính' }, { name: 'Thủ thư' }],
   },
 };

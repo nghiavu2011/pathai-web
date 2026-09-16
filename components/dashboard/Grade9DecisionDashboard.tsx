@@ -280,7 +280,7 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
                     Bạn ơi! Bạn chưa làm trắc nghiệm Sở thích (RIASEC)
                   </h4>
                   <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                    Chỉ cần 10 phút trả lời các câu hỏi vui về thói quen và sở thích hằng ngày, hệ thống sẽ mở khóa ngay 3 nhóm nghề phù hợp nhất dành riêng cho bạn!
+                    Chỉ cần 10 phút trả lời các câu hỏi vui về thói quen và sở thích hằng ngày, hệ thống sẽ mở khóa ngay 3 nhóm nghề tiềm năng nhất để bạn cùng gia đình khám phá!
                   </p>
                   <div className="flex flex-wrap justify-center gap-3 pt-2">
                     {onSelectQuiz && (
@@ -713,7 +713,7 @@ export const Grade9DecisionDashboard: React.FC<Grade9DecisionDashboardProps> = (
                     Chưa có dữ liệu trắc nghiệm Sở thích (RIASEC)
                   </h4>
                   <p className="text-sm text-slate-500 max-w-lg mx-auto">
-                    Để hệ thống có căn cứ khoa học đề xuất 3–5 vùng nghề triển vọng và chiến lược chọn môn THPT phù hợp nhất, bạn cần thực hiện bài đánh giá Sở thích Holland.
+                    Để hệ thống có căn cứ khoa học đề xuất 3–5 vùng nghề triển vọng và chiến lược chọn môn THPT tối ưu, bạn cần thực hiện bài đánh giá Sở thích Holland.
                   </p>
                   <div className="flex flex-wrap justify-center gap-3 pt-2">
                     {onSelectQuiz && (

@@ -8,43 +8,71 @@ interface TrustPageViewProps {
   onGoHome: () => void;
 }
 
-const TAB_CONFIG: Record<TrustTab, { title: string; path: string; label: string; badge: string }> = {
+const TAB_CONFIG: Record<TrustTab, { title: string; pageTitle: string; path: string; label: string; badge: string; description: string }> = {
   methodology: {
     title: 'Phương Pháp Luận Khoa Học & Khung Đánh Giá',
+    pageTitle: 'Phương pháp | PathAI',
     path: '/methodology',
     label: '1. Phương Pháp Luận',
-    badge: '11 Khung Đánh Giá Chuẩn Hóa'
+    badge: '11 Khung Đánh Giá Chuẩn Hóa',
+    description: 'Phương pháp luận khoa học, mô hình sở thích nghề nghiệp RIASEC và nguyên tắc AI an toàn của PathAI.'
   },
   'ai-safety': {
     title: 'An Toàn Trợ Lý AI & Bảo Vệ Học Đường',
+    pageTitle: 'An toàn AI | PathAI',
     path: '/ai-safety',
     label: '2. An Toàn AI',
-    badge: 'Can Thiệp Khủng Hoảng 111'
+    badge: 'Can Thiệp Khủng Hoảng 111',
+    description: 'Tiêu chuẩn an toàn AI, nguyên tắc không chẩn đoán y tế và giao thức can thiệp khủng hoảng trẻ em 111.'
   },
   privacy: {
     title: 'Chính Sách Bảo Mật & Quyền Riêng Tư Dữ Liệu',
+    pageTitle: 'Chính sách bảo mật | PathAI',
     path: '/privacy',
     label: '3. Quyền Riêng Tư',
-    badge: 'Nghị Định 13/2023/NĐ-CP'
+    badge: 'Nghị Định 13/2023/NĐ-CP',
+    description: 'Chính sách bảo vệ dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP và cam kết lưu trữ cục bộ của PathAI.'
   },
   terms: {
     title: 'Điều Khoản Dịch Vụ & Giới Hạn Trách Nhiệm',
+    pageTitle: 'Điều khoản sử dụng | PathAI',
     path: '/terms',
     label: '4. Điều Khoản Sử Dụng',
-    badge: 'Phạm Vi Phi Y Tế'
+    badge: 'Phạm Vi Phi Y Tế',
+    description: 'Điều khoản sử dụng và giới hạn trách nhiệm phi y tế của nền tảng hướng nghiệp PathAI.'
   },
   'data-sources': {
     title: 'Minh Bạch Nguồn Dữ Liệu Tuyển Sinh 2026',
+    pageTitle: 'Nguồn dữ liệu | PathAI',
     path: '/data-sources',
     label: '5. Nguồn Tuyển Sinh',
-    badge: 'CTGDPT 2018 & MOET'
+    badge: 'CTGDPT 2018 & MOET',
+    description: 'Minh bạch nguồn dữ liệu môn học GDPT 2018 và thông tin tuyển sinh Đại học 2026 trên PathAI.'
   }
 };
 
 const TrustPageView: React.FC<TrustPageViewProps> = ({ activeTab, onSelectTab, onGoHome }) => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    document.title = `${TAB_CONFIG[activeTab]?.title || 'Trung Tâm Tin Cậy'} | PathAI`;
+    const cfg = TAB_CONFIG[activeTab];
+    if (cfg) {
+      document.title = cfg.pageTitle;
+      
+      // Update canonical link
+      let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonicalLink) {
+        canonicalLink = document.createElement('link');
+        canonicalLink.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalLink);
+      }
+      canonicalLink.setAttribute('href', `https://pathai-web-intro.vercel.app${cfg.path}`);
+
+      // Update meta description
+      let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+      if (metaDesc) {
+        metaDesc.setAttribute('content', cfg.description);
+      }
+    }
   }, [activeTab]);
 
   return (

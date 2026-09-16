@@ -22,7 +22,7 @@ const GritResultsDisplay: React.FC<GritResultsDisplayProps> = (props) => {
   const gritClassification = GRIT_CLASSIFICATION.find(c => results.grit >= c.range[0] && results.grit <= c.range[1]);
   const careerSuggestion = GRIT_CAREER_SUGGESTIONS.find(s => s.level.includes(gritClassification?.level || ''));
   
-  const resultsSummary = `Điểm Bền chí (Grit) tổng thể của bạn là **${results.grit.toFixed(1)}/5.0**, ở mức **${gritClassification?.level}**. Điều này cho thấy bạn là người **${gritClassification?.description}**. Điểm số này được tổng hợp từ hai yếu tố: **Sự kiên trì nỗ lực (${results.effort.toFixed(1)})** và **Sự ổn định đam mê (${results.interest.toFixed(1)})**.`;
+  const resultsSummary = `Điểm Bền chí (Grit) tổng thể của bạn là **${results.grit.toFixed(1)}/5.0**, ở mức **${gritClassification?.level}**. Điều này phản ánh xu hướng **${gritClassification?.description}**. Điểm số này được tổng hợp từ hai yếu tố: **Sự kiên trì nỗ lực (${results.effort.toFixed(1)})** và **Sự ổn định đam mê (${results.interest.toFixed(1)})**.`;
 
   const systemInstruction = `Bạn là Trợ lý AI Tham vấn Rèn luyện Ý chí & Động lực PathAI (Grit Scale - Angela Duckworth). Dựa trên kết quả tự đánh giá của học sinh, hãy giải thích ý nghĩa và gợi ý các thói quen học tập nhỏ để duy trì động lực, không gán nhãn cố định năng lực. Kết quả của học sinh là: ${JSON.stringify(results)}`;
   const initialMessage = `Xin chào ${userData?.fullName || 'bạn'}, điểm Bền chí của bạn là **${results.grit.toFixed(1)}**, ở mức **${gritClassification?.level}**. Đây là một chỉ số quan trọng cho thành công dài hạn. Bạn có muốn tìm hiểu cách để rèn luyện sự bền bỉ hoặc khám phá môi trường nào sẽ giúp bạn phát huy tốt nhất phẩm chất này không?`;

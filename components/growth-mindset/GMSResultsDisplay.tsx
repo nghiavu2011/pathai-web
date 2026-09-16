@@ -24,7 +24,7 @@ const GMSResultsDisplay: React.FC<GMSResultsDisplayProps> = (props) => {
     return GMS_CLASSIFICATION.find(c => results.growth_mindset >= c.range[0] && results.growth_mindset <= c.range[1]);
   }, [results.growth_mindset]);
 
-  const resultsSummary = `Điểm Tư duy Phát triển tổng thể của bạn là **${results.growth_mindset.toFixed(1)}/5.0**, ở mức **${classification?.level}**. Điều này cho thấy bạn là người **${classification?.description}**. Tư duy này ảnh hưởng trực tiếp đến cách bạn đối mặt thử thách và học hỏi.`;
+  const resultsSummary = `Điểm Tư duy Phát triển tổng thể của bạn là **${results.growth_mindset.toFixed(1)}/5.0**, ở mức **${classification?.level}**. Điều này phản ánh xu hướng **${classification?.description}**. Tư duy này ảnh hưởng trực tiếp đến cách bạn đối mặt thử thách và học hỏi.`;
 
   const systemInstruction = `Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI, áp dụng khung Tư duy Phát triển (Growth Mindset - Carol Dweck). Dựa trên kết quả tự đánh giá của học sinh, hãy giải thích ý nghĩa mang tính rèn luyện, gợi ý các chiến lược cụ thể để hình thành thói quen kiên trì, đón nhận thử thách và cải thiện qua quá trình học tập. Tuyệt đối không phán xét hay gắn nhãn cố định. Kết quả của học sinh: ${JSON.stringify(results)}`;
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, kết quả cho thấy bạn đang thể hiện mức độ tư duy phát triển **${classification?.level}**. Tư duy là thứ hoàn toàn có thể rèn luyện và mở rộng theo thời gian. Bạn có muốn cùng mình khám phá một số phương pháp học tập và vượt qua rào cản thử thách không?`;
