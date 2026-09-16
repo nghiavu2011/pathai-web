@@ -62,6 +62,9 @@ import FloatingShare from './components/shared/FloatingShare';
 import PrivacyConsent from './components/PrivacyConsent';
 import Grade9DecisionDashboard from './components/dashboard/Grade9DecisionDashboard';
 
+import TrustPageView, { TrustTab } from './components/TrustPageView';
+import NotFoundView from './components/NotFoundView';
+
 const HollandResultsDisplay = React.lazy(() => import('./components/holland/HollandResultsDisplay'));
 const MIResultsDisplay = React.lazy(() => import('./components/multiple-intelligences/MIResultsDisplay'));
 const GritResultsDisplay = React.lazy(() => import('./components/grit-scale/GritResultsDisplay'));
@@ -75,18 +78,62 @@ const WheelOfLifeResultsDisplay = React.lazy(() => import('./components/wheel-of
 const BigFiveResultsDisplay = React.lazy(() => import('./components/big-five/BigFiveResultsDisplay'));
 const EQResultsDisplay = React.lazy(() => import('./components/eq/EQResultsDisplay'));
 
-type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard';
+type View = 'home' | 'quiz' | 'results' | 'history' | 'goals' | 'decision-dashboard' | 'trust' | 'login' | 'not-found';
 
 interface QuizState {
   currentStep: number;
   answers: Answers;
 }
 
+const parsePath = (pathname: string): { view: View; trustTab?: TrustTab; quizId?: string } => {
+  const cleanPath = pathname.toLowerCase().replace(/\/$/, '') || '/';
+  
+  if (cleanPath === '/' || cleanPath === '') {
+    return { view: 'home' };
+  }
+  if (cleanPath === '/methodology') {
+    return { view: 'trust', trustTab: 'methodology' };
+  }
+  if (cleanPath === '/ai-safety' || cleanPath === '/safety') {
+    return { view: 'trust', trustTab: 'ai-safety' };
+  }
+  if (cleanPath === '/privacy') {
+    return { view: 'trust', trustTab: 'privacy' };
+  }
+  if (cleanPath === '/terms') {
+    return { view: 'trust', trustTab: 'terms' };
+  }
+  if (cleanPath === '/data-sources' || cleanPath === '/sources') {
+    return { view: 'trust', trustTab: 'data-sources' };
+  }
+  if (cleanPath === '/history') {
+    return { view: 'history' };
+  }
+  if (cleanPath === '/goals') {
+    return { view: 'goals' };
+  }
+  if (cleanPath === '/decision-dashboard' || cleanPath === '/dashboard') {
+    return { view: 'decision-dashboard' };
+  }
+  if (cleanPath === '/login' || cleanPath === '/profile') {
+    return { view: 'login' };
+  }
+  if (cleanPath.startsWith('/quiz')) {
+    const parts = cleanPath.split('/');
+    const qId = parts[2];
+    return { view: 'quiz', quizId: qId || 'holland' };
+  }
+  
+  return { view: 'not-found' };
+};
+
 const App: React.FC = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [theme, setTheme] = useState(() => localStorage.getItem('pathai:v2:theme') || 'light');
   const [currentView, setCurrentView] = useState<View>('home');
+  const [trustTab, setTrustTab] = useState<TrustTab>('methodology');
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState>({ currentStep: 0, answers: {} });
   const [results, setResults] = useState<any | null>(null);
@@ -94,6 +141,38 @@ const App: React.FC = () => {
 
   const [history, setHistory] = useState<QuizHistoryEntry[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+
+  // HTML5 History & URL routing synchronization
+  const navigateTo = (path: string) => {
+    window.history.pushState({}, '', path);
+    const route = parsePath(path);
+    setCurrentView(route.view);
+    if (route.trustTab) {
+      setTrustTab(route.trustTab);
+    }
+    if (route.quizId) {
+      setSelectedQuizId(route.quizId);
+      setQuizState({ currentStep: 0, answers: {} });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parsePath(window.location.pathname);
+      setCurrentView(route.view);
+      if (route.trustTab) {
+        setTrustTab(route.trustTab);
+      }
+      if (route.quizId) {
+        setSelectedQuizId(route.quizId);
+      }
+    };
+
+    handlePopState();
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Load User Data with total namespace isolation
   useEffect(() => {
@@ -400,69 +479,9 @@ const App: React.FC = () => {
     localStorage.setItem('pathai:v2:theme', theme);
   }, [theme]);
 
-  // Auth Handling
-  const handleLogin = (data: UserData) => {
-    setUserData(data);
-    StorageService.saveUserProfile(data);
-    if (data.uid) {
-      setHistory(StorageService.getHistory(data.uid));
-      setGoals(StorageService.getGoals(data.uid));
-    }
-  };
-
-  const handleLogout = () => {
-    StorageService.purgeSession();
-    setUserData(null);
-    setHistory([]);
-    setGoals([]);
-    setResults(null);
-    setHistorySnapshotUser(null);
-    setSelectedQuizId(null);
-    setCurrentView('home');
-  };
-
-  const completedStages = useMemo(() => {
-    const stage1 = ['holland', 'mi', 'big-five', 'eq', 'context'];
-    const stage2 = ['wheel', 'cdb', 'work-values', 'schein'];
-    const stage3 = ['grit', 'crs', 'gms'];
-
-    return {
-      s1: history.some(h => stage1.includes(h.quizId)),
-      s2: history.some(h => stage2.includes(h.quizId)),
-      s3: history.some(h => stage3.includes(h.quizId))
-    };
-  }, [history]);
-
-  const canShowSynthesis = completedStages.s1 && completedStages.s2 && completedStages.s3;
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [quizState.currentStep, currentView]);
-
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-  const resetQuiz = () => {
-    setSelectedQuizId(null);
-    setQuizState({ currentStep: 0, answers: {} });
-    setResults(null);
-    setHistorySnapshotUser(null);
-  };
-
-  const handleGoHome = () => {
-    resetQuiz();
-    setCurrentView('home');
-  };
-
-  const handleSelectQuiz = (id: string) => {
-    resetQuiz();
-    setSelectedQuizId(id);
-    setCurrentView('quiz');
-  };
-
-  const handleOpenQuizInfo = (id: string) => {
-    setInfoQuizId(id);
-    setQuizInfoModalOpen(true);
-  };
+  // Step Navigation
 
   const handleNextStep = () => {
     setQuizState(prev => ({ ...prev, currentStep: prev.currentStep + 1 }));
@@ -481,6 +500,49 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleGoHome = () => navigateTo('/');
+  const handleViewHistory = () => navigateTo('/history');
+  const handleViewGoals = () => navigateTo('/goals');
+  const handleViewDecisionDashboard = () => navigateTo('/decision-dashboard');
+
+  const handleSelectQuiz = (quizId: string) => {
+    resetQuiz();
+    setSelectedQuizId(quizId);
+    navigateTo(`/quiz/${quizId}`);
+  };
+
+  const handleOpenQuizInfo = (quizId: string) => {
+    setInfoQuizId(quizId);
+    setQuizInfoModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    setUserData(null);
+    setHistory([]);
+    setGoals([]);
+    StorageService.purgeSession();
+    navigateTo('/');
+  };
+
+  const handleLogin = (data: UserData) => {
+    setUserData(data);
+    StorageService.saveUserProfile(data);
+    const userHistory = StorageService.getHistory(data.uid || '');
+    const userGoals = StorageService.getGoals(data.uid || '');
+    setHistory(userHistory);
+    setGoals(userGoals);
+    setLoginModalOpen(false);
+    if (currentView === 'login') {
+      navigateTo('/');
+    }
+  };
+
+  const resetQuiz = () => {
+    setQuizState({ currentStep: 0, answers: {} });
+    setResults(null);
+    setHistorySnapshotUser(null);
+  };
+
   // Finish Quiz and View Results
   const handleFinishQuiz = () => {
     if (!selectedQuizId) return;
@@ -491,27 +553,38 @@ const App: React.FC = () => {
     setResults(calculatedResults);
     setHistorySnapshotUser(null);
 
-    if (userData?.uid) {
+    const activeUser = userData || {
+      fullName: 'Học sinh Khám phá',
+      email: '',
+      birthYear: '2008',
+      gender: 'Khác',
+      location: 'Việt Nam',
+      status: 'Học sinh THPT',
+      educationLevel: 'THPT',
+      source: 'Website',
+      expectations: '',
+      bio: '',
+      avatarUrl: '',
+      uid: `guest-${Date.now()}`
+    };
+
+    if (activeUser.uid) {
       const newHistoryEntry: QuizHistoryEntry = {
         id: `${selectedQuizId}-${Date.now()}`,
         quizId: selectedQuizId,
         quizTitle: config.title,
         timestamp: Date.now(),
-        userData: { ...userData },
+        userData: { ...activeUser },
         results: calculatedResults,
         answers: quizState.answers,
       };
 
       const updatedHistory = [newHistoryEntry, ...history];
       setHistory(updatedHistory);
-      StorageService.saveHistory(userData.uid, updatedHistory);
+      StorageService.saveHistory(activeUser.uid, updatedHistory);
     }
     setCurrentView('results');
   };
-
-  const handleViewHistory = () => setCurrentView('history');
-  const handleViewGoals = () => setCurrentView('goals');
-  const handleViewDecisionDashboard = () => setCurrentView('decision-dashboard');
 
   // Read-only history viewing: Never mutate active userData state
   const handleViewResultFromHistory = (entry: QuizHistoryEntry) => {
@@ -571,15 +644,26 @@ const App: React.FC = () => {
     return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
   }
 
-  if (!userData) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   const renderContent = () => {
     switch (currentView) {
+      case 'trust':
+        return (
+          <TrustPageView
+            activeTab={trustTab}
+            onSelectTab={(tab) => navigateTo(`/${tab}`)}
+            onGoHome={handleGoHome}
+          />
+        );
+
+      case 'login':
+        return <Login onLogin={handleLogin} />;
+
+      case 'not-found':
+        return <NotFoundView onGoHome={handleGoHome} />;
+
       case 'quiz': {
         if (!currentQuizConfig) {
-          return <HomePage onSelectQuiz={handleSelectQuiz} onOpenGuide={() => setGuideModalOpen(true)} onOpenQuizInfo={handleOpenQuizInfo} />;
+          return <HomePage onSelectQuiz={handleSelectQuiz} onOpenGuide={() => setGuideModalOpen(true)} onOpenQuizInfo={handleOpenQuizInfo} onOpenDecisionDashboard={handleViewDecisionDashboard} history={history} userData={userData} />;
         }
         const { steps, introduction, quizData, ratingOptions, ratingLabels } = currentQuizConfig;
         const isResultsStep = quizState.currentStep === steps.length - 1;
@@ -661,7 +745,6 @@ const App: React.FC = () => {
             onOpenQuizInfo={handleOpenQuizInfo}
             onOpenDecisionDashboard={handleViewDecisionDashboard}
             history={history}
-            canShowSynthesis={canShowSynthesis}
             userData={userData}
           />
         );
@@ -682,15 +765,29 @@ const App: React.FC = () => {
         onViewGoals={handleViewGoals}
         onOpenDecisionDashboard={handleViewDecisionDashboard}
         onLogout={handleLogout}
+        onLoginClick={() => setLoginModalOpen(true)}
       />
       <main className="flex-grow container mx-auto px-4 pt-32 pb-12 md:pt-44">
         {renderContent()}
       </main>
-      <Footer onOpenDonationModal={() => setDonateModalOpen(true)} />
+      <Footer onOpenDonationModal={() => setDonateModalOpen(true)} onNavigate={navigateTo} />
       <FeedbackButton onClick={() => setFeedbackModalOpen(true)} />
       <DonateModal isOpen={isDonateModalOpen} onClose={() => setDonateModalOpen(false)} />
       <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setFeedbackModalOpen(false)} />
       {isGuideModalOpen && <GuideModal onClose={() => setGuideModalOpen(false)} />}
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 relative shadow-2xl border border-slate-200 dark:border-slate-800">
+            <button
+              onClick={() => setLoginModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full"
+            >
+              ✕
+            </button>
+            <Login onLogin={handleLogin} />
+          </div>
+        </div>
+      )}
       {isQuizInfoModalOpen && infoQuizId && (
         <QuizInfoModal
           isOpen={isQuizInfoModalOpen}

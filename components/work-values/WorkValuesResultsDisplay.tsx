@@ -31,8 +31,8 @@ const WorkValuesResultsDisplay: React.FC<WorkValuesResultsDisplayProps> = (props
 
   const resultsSummary = `Ba giá trị nghề nghiệp quan trọng nhất đối với bạn là: ${topValuesString}. Khi công việc của bạn phù hợp với những giá trị này, bạn sẽ cảm thấy hài lòng, có động lực và ý nghĩa hơn.`;
 
-  const systemInstruction = `Bạn là một chuyên gia tư vấn hướng nghiệp, am hiểu về lý thuyết Giá trị Nghề nghiệp (Work Values). Dựa trên kết quả của người dùng, hãy giúp họ hiểu rõ hơn về ý nghĩa của các giá trị họ coi trọng, và gợi ý cách tìm kiếm một môi trường làm việc hoặc vai trò phù hợp với những giá trị đó. Kết quả của người dùng: ${JSON.stringify(results)}`;
-  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, kết quả cho thấy bạn rất coi trọng các giá trị: ${topValuesString}. Đây là những yếu tố cốt lõi mang lại sự thỏa mãn trong công việc cho bạn. Bạn có muốn khám phá xem làm thế nào để tìm được một công việc phù hợp với những giá trị này không?`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI, hỗ trợ học sinh khám phá Giá trị Nghề nghiệp (Work Values). Dựa trên kết quả tự đánh giá của học sinh, hãy giúp học sinh làm rõ ý nghĩa của các giá trị bản thân ưu tiên, gợi ý cách tìm kiếm môi trường học tập, hoạt động ngoại khóa hoặc định hướng ngành nghề nuôi dưỡng các giá trị đó. Không phán xét hay ấn định tương lai. Kết quả: ${JSON.stringify(results)}`;
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, kết quả cho thấy bạn đang quan tâm nhiều đến các giá trị: ${topValuesString}. Đây là những kim chỉ nam quan trọng giúp bạn định hình môi trường làm việc mơ ước. Bạn có muốn cùng mình tìm hiểu các môi trường thực tế phù hợp với các giá trị này không?`;
 
   const topValueName = WORK_VALUES_RESULT_DETAILS[topThree[0].key].name;
   const newsQuery = `tìm kiếm công việc và văn hóa công ty phù hợp với giá trị nghề nghiệp ${topValueName}`;

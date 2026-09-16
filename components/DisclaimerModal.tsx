@@ -1,11 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface DisclaimerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultTab?: 'terms' | 'methodology' | 'safety' | 'privacy' | 'sources';
 }
 
-const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose }) => {
+type TabType = 'terms' | 'methodology' | 'safety' | 'privacy' | 'sources';
+
+const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose, defaultTab = 'terms' }) => {
+  const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
+
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab, isOpen]);
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -18,28 +27,30 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose }) =>
 
   return (
     <div
-      className="fixed inset-0 bg-sage-900/40 backdrop-blur-sm z-[60] flex justify-center items-center p-4 transition-opacity duration-300 animate-fade-in"
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex justify-center items-center p-4 transition-opacity duration-300 animate-fade-in font-sans"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
+      aria-labelledby="trust-modal-title"
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl mx-auto relative transform transition-transform duration-300 animate-scale-in flex flex-col max-h-[85vh]"
+        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl mx-auto relative transform transition-transform duration-300 animate-scale-in flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-800 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-sage-100 dark:border-slate-700 bg-cream-50 dark:bg-slate-800/50 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex justify-between items-center">
           <div>
-             <h2 className="font-display text-2xl font-bold text-sage-800 dark:text-slate-100">
-              Tuyên bố Miễn trừ Trách nhiệm
+            <h2 id="trust-modal-title" className="font-display text-2xl font-bold text-slate-900 dark:text-white">
+              Trung Tâm Minh Bạch & An Toàn Học Đường
             </h2>
-            <p className="text-xs text-sage-500 dark:text-slate-400 font-medium uppercase tracking-widest mt-1">
-              Vui lòng đọc kỹ trước khi sử dụng
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wider mt-1">
+              PathAI Student 9–12 | Chuẩn hóa theo CTGDPT 2018 & Nghị định 13/2023/NĐ-CP
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-sage-400 hover:bg-sage-100 hover:text-sage-600 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-full text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            aria-label="Đóng cửa sổ"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -47,63 +58,109 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose }) =>
           </button>
         </div>
 
-        {/* Legal Content */}
-        <div className="p-8 overflow-y-auto custom-scrollbar text-slate-600 dark:text-slate-300 text-sm leading-relaxed space-y-6 text-justify">
-          
-          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-lg">
-            <p className="font-bold text-amber-800 dark:text-amber-200 mb-1">Cảnh báo quan trọng:</p>
-            <p>PathAI là công cụ hỗ trợ khám phá bản thân dựa trên Trí tuệ nhân tạo (AI) và các mô hình tâm lý học. Mọi kết quả chỉ mang tính chất tham khảo và không thay thế cho lời khuyên chuyên môn y tế, tâm lý hoặc pháp lý.</p>
-          </div>
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/40 px-6 gap-2 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('terms')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'terms' ? 'border-accent text-accent-dark dark:text-accent-light' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            1. Điều khoản & Miễn trừ
+          </button>
+          <button
+            onClick={() => setActiveTab('methodology')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'methodology' ? 'border-accent text-accent-dark dark:text-accent-light' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            2. Phương pháp khoa học
+          </button>
+          <button
+            onClick={() => setActiveTab('safety')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'safety' ? 'border-accent text-accent-dark dark:text-accent-light' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            3. An toàn AI & Trẻ em
+          </button>
+          <button
+            onClick={() => setActiveTab('privacy')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'privacy' ? 'border-accent text-accent-dark dark:text-accent-light' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            4. Bảo mật dữ liệu
+          </button>
+          <button
+            onClick={() => setActiveTab('sources')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'sources' ? 'border-accent text-accent-dark dark:text-accent-light' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            5. Nguồn dữ liệu 2026
+          </button>
+        </div>
 
-          <section>
-            <h3 className="font-display font-bold text-lg text-sage-800 dark:text-slate-200 mb-2">1. Bản chất của Dịch vụ & Giới hạn Trách nhiệm</h3>
-            <p>
-              Ứng dụng này sử dụng các thuật toán máy tính và AI để phân tích dữ liệu đầu vào của người dùng dựa trên các khung lý thuyết (như Holland, Big Five, v.v.). Mặc dù chúng tôi nỗ lực đảm bảo độ chính xác cao nhất, nhưng <strong>PathAI và đội ngũ phát triển hoàn toàn không chịu trách nhiệm pháp lý</strong> đối với:
-            </p>
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Bất kỳ quyết định nghề nghiệp, tài chính, hoặc đời sống cá nhân nào mà người dùng đưa ra dựa trên kết quả trắc nghiệm.</li>
-                <li>Sự sai lệch giữa kết quả trắc nghiệm và thực tế tính cách hoặc năng lực của người dùng.</li>
-                <li>Bất kỳ thiệt hại trực tiếp, gián tiếp hoặc hệ quả nào phát sinh từ việc sử dụng thông tin trên ứng dụng này.</li>
-            </ul>
-            <p className="mt-2 italic">Người dùng tự chịu trách nhiệm hoàn toàn cho các quyết định của mình.</p>
-          </section>
+        {/* Tab Content */}
+        <div className="p-8 overflow-y-auto text-slate-600 dark:text-slate-300 text-sm leading-relaxed space-y-6">
+          {activeTab === 'terms' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl">
+                <p className="font-bold text-amber-800 dark:text-amber-300 mb-1">Cảnh báo bản chất dịch vụ:</p>
+                <p className="text-xs">PathAI là công cụ đồng hành hỗ trợ ra quyết định học tập và khám phá sở thích. Mọi kết quả mang tính chất tham khảo, khơi gợi hướng đi, không thay thế cho chẩn đoán y tế, tâm lý trị liệu hay tư vấn pháp lý.</p>
+              </div>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Giới hạn trách nhiệm</h3>
+              <p>Học sinh và phụ huynh là chủ thể ra quyết định cuối cùng. PathAI cung cấp thông tin đối chiếu, phân tích rủi ro đóng mở cơ hội, nhưng không chịu trách nhiệm đối với các quyết định tuyển sinh cá nhân.</p>
+            </div>
+          )}
 
-          <section>
-            <h3 className="font-display font-bold text-lg text-sage-800 dark:text-slate-200 mb-2">2. Sở hữu Trí tuệ & Cơ sở Học thuật</h3>
-            <p>
-              Các bài trắc nghiệm trên PathAI được xây dựng dựa trên các học thuyết tâm lý học công khai và đã được kiểm chứng (như RIASEC của John Holland, OCEAN của Costa & McCrae, v.v.). Chúng tôi không tuyên bố quyền sở hữu đối với các lý thuyết gốc này.
-            </p>
-            <p className="mt-2">
-              Tuy nhiên, <strong>giao diện người dùng, mã nguồn, thuật toán xử lý, cách thức trình bày và các nội dung phái sinh (lời khuyên từ AI, kịch bản phân tích) là tài sản trí tuệ độc quyền của PathAI Studio</strong>. Nghiêm cấm mọi hành vi sao chép, trích xuất dữ liệu hoặc sử dụng cho mục đích thương mại mà không có sự đồng ý bằng văn bản.
-            </p>
-          </section>
+          {activeTab === 'methodology' && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Nguyên tắc đánh giá & Không phán nghề</h3>
+              <p>Hệ thống tích hợp 11 công cụ trắc nghiệm tâm lý học kinh điển (Holland RIASEC, Gardner MI, Big Five OCEAN, Schein Career Anchors, Duckworth Grit...).</p>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs">
+                <li><strong>Không dán nhãn định mệnh:</strong> Kết quả được thể hiện dưới dạng <em>Giả thuyết nghề nghiệp (Career Hypotheses)</em> để học sinh kiểm chứng qua môn học và dự án thực tế.</li>
+                <li><strong>Không điểm giả định:</strong> Thiếu dữ liệu điểm học tập sẽ trả về trạng thái Khám phá (Explore) thay vì tự gán số điểm.</li>
+                <li><strong>Tách bạch chiêm nghiệm văn hóa:</strong> 14 Chính tinh và Ngũ hành được xếp riêng ở mục Reflection, hoàn toàn không làm sai lệch điểm trắc nghiệm RIASEC.</li>
+              </ul>
+            </div>
+          )}
 
-          <section>
-            <h3 className="font-display font-bold text-lg text-sage-800 dark:text-slate-200 mb-2">3. Tính chất của Tư vấn AI</h3>
-            <p>
-              Các lời khuyên được tạo ra bởi mô hình ngôn ngữ lớn (LLM). AI có thể mắc lỗi hoặc đưa ra thông tin không hoàn toàn chính xác trong một số ngữ cảnh cụ thể (hallucinations). Người dùng cần có tư duy phản biện và chắt lọc khi tiếp nhận thông tin.
-            </p>
-          </section>
+          {activeTab === 'safety' && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Chính sách An toàn AI & Phòng ngừa Khủng hoảng</h3>
+              <p>Trợ lý AI của PathAI hoạt động với ranh giới an toàn nghiêm ngặt dành cho trẻ vị thành niên:</p>
+              <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 rounded-2xl text-xs space-y-2 text-rose-900 dark:text-rose-200">
+                <p className="font-bold">Kênh hỗ trợ khẩn cấp 24/7 khi gặp khủng hoảng tâm lý:</p>
+                <p>📞 <strong>Tổng đài Quốc gia Bảo vệ Trẻ em:</strong> <strong>111</strong> (Miễn phí 24/7)</p>
+                <p>💚 <strong>Đường dây nóng Hỗ trợ Tâm lý Ngày Mai:</strong> <strong>096 306 1414</strong></p>
+                <p>🚑 <strong>Cấp cứu Y tế:</strong> <strong>115</strong></p>
+              </div>
+              <p className="text-xs">AI sẽ tự động ngắt chế độ đàm thoại hướng nghiệp và kích hoạt thông điệp an toàn khi phát hiện dấu hiệu căng thẳng tâm lý nghiêm trọng.</p>
+            </div>
+          )}
 
-          <section>
-            <h3 className="font-display font-bold text-lg text-sage-800 dark:text-slate-200 mb-2">4. Cam kết Bảo mật (Sơ bộ)</h3>
-            <p>
-              Chúng tôi tôn trọng quyền riêng tư của bạn. Dữ liệu đầu vào chỉ được sử dụng để tạo kết quả trắc nghiệm trong phiên làm việc. Chúng tôi không bán dữ liệu danh tính của bạn cho bên thứ ba.
-            </p>
-          </section>
+          {activeTab === 'privacy' && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Bảo mật Local-First & Tuân thủ Nghị định 13/2023/NĐ-CP</h3>
+              <p>Toàn bộ điểm trắc nghiệm, ghi chú mục tiêu và tổ hợp môn được lưu trữ trên bộ nhớ trình duyệt cục bộ (Local Storage) của bạn.</p>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs">
+                <li><strong>Không bán dữ liệu:</strong> Không cài đặt bất kỳ mã theo dõi quảng cáo bên thứ ba nào.</li>
+                <li><strong>Cô lập phiên làm việc:</strong> Khóa lưu trữ namespaced theo UID giúp an toàn trên máy tính dùng chung tại trường học.</li>
+                <li><strong>Quyền được xóa bỏ (Right to Erasure):</strong> Học sinh có thể bấm 1 nút để xóa vĩnh viễn toàn bộ dữ liệu khỏi thiết bị.</li>
+              </ul>
+            </div>
+          )}
 
-          <div className="pt-6 border-t border-sage-100 dark:border-slate-700 text-xs text-slate-400 text-center">
-            Văn bản này có hiệu lực kể từ ngày bạn bắt đầu sử dụng dịch vụ. Đội ngũ PathAI bảo lưu quyền thay đổi nội dung mà không cần báo trước.
-          </div>
+          {activeTab === 'sources' && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Cơ sở Dữ liệu Môn học & Tuyển sinh Đại học (Xác thực 2026)</h3>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs">
+                <li><strong>Chương trình GDPT 2018:</strong> Áp dụng Thông tư 32/2018/TT-BGDĐT và Thông tư sửa đổi 13/2022/TT-BGDĐT (Toán, Văn, Anh, Sử là 4 môn bắt buộc toàn quốc; GDKT&PL, KHTN, Nghệ thuật là môn tự chọn).</li>
+                <li><strong>Dữ liệu Tuyển sinh 2026:</strong> Điểm chuẩn tham chiếu và quy chế tuyển sinh từ ĐHBK Hà Nội (TSA), ĐHQG Hà Nội (HSA), ĐHQG-HCM, Ngoại thương, Kinh tế Quốc dân, Y Hà Nội... cập nhật ngày 01/03/2026.</li>
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 bg-cream-50 dark:bg-slate-800/50 border-t border-sage-100 dark:border-slate-700 rounded-b-2xl flex justify-end">
+        <div className="p-6 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex justify-end">
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-sage-600 hover:bg-sage-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-sage-200/50"
+            className="px-8 py-3 bg-accent hover:bg-accent-dark text-white font-bold rounded-2xl transition-all shadow-lg shadow-accent/20 text-xs uppercase tracking-wider"
           >
-            Tôi đã hiểu & Đồng ý
+            Tôi Đã Hiểu & Tiếp Tục
           </button>
         </div>
       </div>
@@ -111,4 +168,4 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose }) =>
   );
 };
 
-export default DisclaimerModal;
+export default DisclaimerModal;

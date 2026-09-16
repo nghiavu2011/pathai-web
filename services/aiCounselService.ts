@@ -4,6 +4,14 @@
  * Includes graceful offline fallback generation for goals, counseling, and news topics.
  */
 
+export type AIResponseStatus = 'AI_RESPONSE' | 'PATHAI_FALLBACK' | 'AI_TEMPORARILY_UNAVAILABLE';
+
+export interface AIResult<T> {
+  status: AIResponseStatus;
+  data: T;
+  notice?: string;
+}
+
 export interface GoalSuggestionRequest {
   quizId: string;
   quizTitle: string;
@@ -45,7 +53,7 @@ export class AICounselService {
   /**
    * Fetch suggested SMART action goals with fallback
    */
-  public static async getGoalSuggestions(req: GoalSuggestionRequest): Promise<string[]> {
+  public static async getGoalSuggestions(req: GoalSuggestionRequest): Promise<AIResult<string[]>> {
     const proxyResult = await this.postProxy<string[]>('goals', {
       quizTitle: req.quizTitle,
       results: req.results,
@@ -53,49 +61,91 @@ export class AICounselService {
     });
 
     if (Array.isArray(proxyResult) && proxyResult.length > 0) {
-      return proxyResult;
+      return {
+        status: 'AI_RESPONSE',
+        data: proxyResult
+      };
     }
 
     // High-quality fallback goals curated for Grade 9-12 Vietnamese students
-    return [
-      `Tìm hiểu 3 ngành học đại học liên quan đến kết quả ${req.quizTitle} và điểm chuẩn năm gần nhất.`,
-      `Tham vấn ý kiến của giáo viên bộ môn hoặc chuyên gia đang làm việc trong lĩnh vực liên quan.`,
-      `Lập kế hoạch chọn tổ hợp môn học lớp 10 hoặc cải thiện 1 kỹ năng cốt lõi trong tháng này.`
-    ];
+    return {
+      status: 'PATHAI_FALLBACK',
+      data: [
+        `Tìm hiểu 3 ngành học đại học liên quan đến kết quả ${req.quizTitle} và điểm chuẩn năm gần nhất.`,
+        `Tham vấn ý kiến của giáo viên bộ môn hoặc chuyên gia đang làm việc trong lĩnh vực liên quan.`,
+        `Lập kế hoạch chọn tổ hợp môn học lớp 10 hoặc cải thiện 1 kỹ năng cốt lõi trong tháng này.`
+      ],
+      notice: 'Hệ thống gợi ý danh mục mục tiêu phát triển mẫu từ cơ sở dữ liệu định hướng của PathAI.'
+    };
   }
 
   /**
    * Send a message to the AI Counselor
    */
-  public static async sendChatMessage(req: ChatCounselRequest): Promise<string> {
+  public static async sendChatMessage(req: ChatCounselRequest): Promise<AIResult<string>> {
+    const lastUserMessage = req.messages[req.messages.length - 1]?.content || '';
+    const crisisPatterns = [
+      /tự tử/i, /tự sát/i, /muốn chết/i, /chết đi/i, /tự hại/i, /rạch tay/i,
+      /không muốn sống/i, /bị bạo hành/i, /bị đánh đập/i, /xâm hại/i,
+      /suicide/i, /kill myself/i, /self harm/i, /end my life/i
+    ];
+    if (crisisPatterns.some(p => p.test(lastUserMessage))) {
+      return {
+        status: 'AI_RESPONSE',
+        data: `Mình cảm nhận bạn đang phải trải qua những cảm xúc rất khó khăn hoặc áp lực nặng nề. Sự an toàn và sức khỏe tinh thần của bạn là điều quan trọng nhất ngay lúc này.
+
+PathAI là công cụ tham vấn học tập và hướng nghiệp, không có chức năng y tế hay can thiệp tâm lý lâm sàng. Xin bạn hãy tạm gác lại các câu hỏi hướng nghiệp và chia sẻ ngay với người lớn mà bạn tin tưởng (cha mẹ, thầy cô, chuyên viên tư vấn học đường) hoặc liên hệ các kênh hỗ trợ khẩn cấp miễn phí:
+
+- 🛡️ **Tổng đài Quốc gia Bảo vệ Trẻ em**: **111** (Hỗ trợ 24/7, miễn phí cước gọi)
+- 💚 **Đường dây nóng Hỗ trợ Tâm lý & Khủng hoảng Ngày Mai**: **096 306 1414** (13:00 - 20:30 hàng ngày)
+- 🚑 **Cấp cứu Y tế**: **115**
+
+Bạn không phải đối mặt với khó khăn này một mình. Hãy tìm kiếm sự trợ giúp từ những người xung quanh nhé!`
+      };
+    }
+
     const proxyResult = await this.postProxy<{ role: string; content: string }>('chat', {
       messages: req.messages,
       systemInstruction: req.systemInstruction
     });
 
     if (proxyResult?.content) {
-      return proxyResult.content;
+      return {
+        status: 'AI_RESPONSE',
+        data: proxyResult.content
+      };
     }
 
     // Empathetic offline fallback message
-    return `Cảm ơn bạn đã chia sẻ. Mỗi bước đi trong quá trình thấu hiểu bản thân đều mang lại giá trị lớn. Hãy tiếp tục khám phá các thế mạnh tự nhiên và thảo luận cùng thầy cô hoặc chuyên viên hướng nghiệp nhé!`;
+    return {
+      status: 'PATHAI_FALLBACK',
+      data: `Cảm ơn bạn đã chia sẻ. Mỗi bước đi trong quá trình thấu hiểu bản thân đều mang lại giá trị lớn. Hãy tiếp tục khám phá các thế mạnh tự nhiên và thảo luận cùng thầy cô hoặc chuyên viên hướng nghiệp nhé!`,
+      notice: 'AI Counselor hiện đang ngoại tuyến. Phản hồi trên được trích xuất từ cẩm nang đồng hành PathAI.'
+    };
   }
 
   /**
    * Fetch topic overview / educational trends
    */
-  public static async getTopicOverview(req: NewsSummaryRequest): Promise<{ content: string; sources: any[] }> {
+  public static async getTopicOverview(req: NewsSummaryRequest): Promise<AIResult<{ content: string; sources: any[] }>> {
     const proxyResult = await this.postProxy<{ content: string; sources: any[] }>('news', {
       query: req.query
     });
 
     if (proxyResult?.content) {
-      return proxyResult;
+      return {
+        status: 'AI_RESPONSE',
+        data: proxyResult
+      };
     }
 
     return {
-      content: `Chủ đề **"${req.query}"** đang là một trong những hướng đi được nhiều học sinh và chuyên gia quan tâm trong bối cảnh thị trường lao động hiện đại.\n\nViệc chủ động trau dồi các kỹ năng tư duy phản biện, khả năng tự học và ngoại ngữ sẽ giúp bạn tạo dựng nền tảng vững chắc cho bất kỳ ngành nghề nào trong tương lai.`,
-      sources: []
+      status: 'PATHAI_FALLBACK',
+      data: {
+        content: `Chủ đề **"${req.query}"** đang là một trong những hướng đi được nhiều học sinh và chuyên gia quan tâm trong bối cảnh thị trường lao động hiện đại.\n\nViệc chủ động trau dồi các kỹ năng tư duy phản biện, khả năng tự học và ngoại ngữ sẽ giúp bạn tạo dựng nền tảng vững chắc cho bất kỳ ngành nghề nào trong tương lai.`,
+        sources: []
+      },
+      notice: 'Tổng quan xu hướng được trích xuất từ cẩm nang định hướng tổng hợp của PathAI.'
     };
   }
 }

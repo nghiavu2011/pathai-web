@@ -9,7 +9,9 @@ const createLocalStorageMock = () => {
     getItem: (key: string) => store[key] || null,
     setItem: (key: string, value: string) => { store[key] = value.toString(); },
     removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; }
+    clear: () => { store = {}; },
+    key: (index: number) => Object.keys(store)[index] || null,
+    get length() { return Object.keys(store).length; }
   };
 };
 
@@ -123,4 +125,67 @@ describe('PATHAI StorageService & Cross-User Isolation Suite', () => {
     expect(migratedHistory).toHaveLength(1);
     expect(migratedGoals).toHaveLength(1);
   });
+
+  it('deletes specific user profile and quiz history without affecting other users', () => {
+    const u1: UserData = {
+      uid: 'u-1',
+      fullName: 'User 1',
+      email: 'u1@test.com',
+      birthYear: '2008',
+      gender: 'Nam',
+      location: 'Hà Nội',
+      status: 'Học sinh THPT',
+      educationLevel: 'THPT',
+      source: 'Website',
+      expectations: '',
+      bio: '',
+      avatarUrl: ''
+    };
+    const u2: UserData = {
+      uid: 'u-2',
+      fullName: 'User 2',
+      email: 'u2@test.com',
+      birthYear: '2008',
+      gender: 'Nữ',
+      location: 'TP.HCM',
+      status: 'Học sinh THPT',
+      educationLevel: 'THPT',
+      source: 'Website',
+      expectations: '',
+      bio: '',
+      avatarUrl: ''
+    };
+
+    StorageService.saveUserProfile(u1);
+    StorageService.saveUserProfile(u2);
+    StorageService.saveHistory('u-1', [{ id: 'h1', quizId: 'holland', quizTitle: 'Holland RIASEC', timestamp: 1, userData: u1, results: {}, answers: {} }]);
+    StorageService.saveHistory('u-2', [{ id: 'h2', quizId: 'mi', quizTitle: 'Multiple Intelligences', timestamp: 2, userData: u2, results: {}, answers: {} }]);
+
+    StorageService.deleteUserData('u-1');
+
+    expect(StorageService.getUserProfile('u-1')).toBeNull();
+    expect(StorageService.getHistory('u-1')).toEqual([]);
+    expect(StorageService.getUserProfile('u-2')).not.toBeNull();
+    expect(StorageService.getHistory('u-2')).toHaveLength(1);
+  });
+
+  it('clearAllData wipes all pathai keys, legacy keys, and consent flags from local storage', () => {
+    localStorage.setItem('pathai:v2:theme', 'dark');
+    localStorage.setItem('pathai:v2:consent', JSON.stringify({ version: '2026-03-v2', accepted: true }));
+    localStorage.setItem('pathai:v2:current_uid', 'user-999');
+    localStorage.setItem('pathai:v2:user:user-999:profile', JSON.stringify({ fullName: 'Student' }));
+    localStorage.setItem('localUserProfile', 'old-data');
+    localStorage.setItem('unrelated_key', 'keep_this');
+
+    StorageService.clearAllData();
+
+    expect(localStorage.getItem('pathai:v2:theme')).toBeNull();
+    expect(localStorage.getItem('pathai:v2:consent')).toBeNull();
+    expect(localStorage.getItem('pathai:v2:current_uid')).toBeNull();
+    expect(localStorage.getItem('pathai:v2:user:user-999:profile')).toBeNull();
+    expect(localStorage.getItem('localUserProfile')).toBeNull();
+    // Unrelated keys should remain untouched
+    expect(localStorage.getItem('unrelated_key')).toBe('keep_this');
+  });
 });
+

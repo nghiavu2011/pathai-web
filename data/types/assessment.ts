@@ -143,7 +143,7 @@ export const ASSESSMENT_REGISTRY: AssessmentMeta[] = [
     purpose: 'self_awareness',
     theorySource: 'Bowlby, J. (1969). Attachment Theory.',
     ageRange: '14+',
-    limitations: 'Attachment không dự đoán nghề phù hợp. Thông tin nhạy cảm cần bảo mật tuyệt đối.',
+    limitations: 'Attachment không dự đoán nghề phù hợp. Thông tin nhạy cảm cần lưu trữ cục bộ và bảo vệ quyền riêng tư theo Nghị định 13/2023/NĐ-CP.',
     usageAllowed: ['Hiểu nền tảng phát triển cá nhân'],
     usageNotAllowed: ['Match nghề', 'Chia sẻ công khai', 'Chẩn đoán tâm lý'],
   },

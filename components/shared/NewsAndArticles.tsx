@@ -26,8 +26,8 @@ const NewsAndArticles: React.FC<NewsAndArticlesProps> = ({ searchQuery, title })
       try {
         const result = await AICounselService.getTopicOverview({ query: searchQuery });
         if (isMounted) {
-          setContent(result.content);
-          setSources(result.sources || []);
+          setContent(result.data.content);
+          setSources(result.data.sources || []);
         }
       } catch (err) {
         console.error("Error fetching news and articles:", err);

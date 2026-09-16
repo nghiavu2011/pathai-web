@@ -35,8 +35,8 @@ const CRSResultsDisplay: React.FC<CRSResultsDisplayProps> = (props) => {
 
   const resultsSummary = `Mức độ Sẵn sàng Nghề nghiệp tổng thể của bạn là **${results.average.toFixed(1)}/5.0**, ở mức **${classification?.level}**. Điều này cho thấy bạn **${classification?.description}**. Lĩnh vực bạn tự tin nhất hiện tại là **${CRS_RESULT_DETAILS[strongestArea.key].name}**.`;
 
-  const systemInstruction = `Bạn là một chuyên gia phát triển sự nghiệp, am hiểu về các mô hình sẵn sàng nghề nghiệp (Career Readiness). Dựa trên kết quả đánh giá của người dùng, hãy phân tích điểm mạnh, điểm cần cải thiện và đưa ra những lời khuyên, kế hoạch hành động cụ thể để giúp họ chuẩn bị tốt hơn cho thị trường lao động. Kết quả của người dùng: ${JSON.stringify(results)}`;
-  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, mức độ sẵn sàng nghề nghiệp của bạn đang ở mức **${classification?.level}**. Đây là một bản đồ giá trị giúp bạn biết mình cần tập trung vào đâu. Bạn có muốn thảo luận về cách cải thiện các kỹ năng hoặc lập một kế hoạch phát triển cụ thể không?`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI, hỗ trợ học sinh khám phá mức độ sẵn sàng nghề nghiệp (Career Readiness). Dựa trên kết quả tự đánh giá, hãy giúp học sinh nhận diện các cơ hội phát triển kỹ năng thực tế, gợi ý các bước trải nghiệm học tập và rèn luyện phù hợp cho học sinh lớp 9-12. Không khẳng định ấn định tương lai. Kết quả: ${JSON.stringify(results)}`;
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, kết quả đánh giá mức độ sẵn sàng nghề nghiệp đang ở mức **${classification?.level}**. Đây là bản đồ gợi ý các nhóm kỹ năng bạn có thể tiếp tục trau dồi trong những năm học tới. Bạn có muốn cùng mình lên kế hoạch rèn luyện các kỹ năng thực tế không?`;
 
   const newsQuery = `cách cải thiện kỹ năng ${CRS_RESULT_DETAILS[weakestArea.key].name} cho sinh viên và người mới đi làm`;
 

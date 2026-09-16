@@ -1,10 +1,18 @@
 import { CareerFamily } from '../types/career';
 import { Subject, SUBJECT_NAME_TO_ID, THPT_SUBJECTS } from '../subjects';
 
+export type SubjectPriority = 
+  | 'core_compulsory'
+  | 'learning_priority_high'
+  | 'learning_priority_medium'
+  | 'learning_priority_low'
+  | 'low_relevance';
+
 export interface SubjectRecommendation {
   subjectId: string;
   subjectName: string;
-  importance: 'required' | 'strongly_recommended' | 'useful' | 'low_relevance';
+  subjectType: 'core' | 'elective';
+  importance: SubjectPriority;
   importanceLabel: string; // Vietnamese
   supportingCareerFamilies: string[]; // career family names that need this subject
   reason: string; // Vietnamese explanation
@@ -34,27 +42,41 @@ export function generateSubjectPlan(
   const recommendations: SubjectRecommendation[] = THPT_SUBJECTS.map(subject => {
     const data = subjectCounts[subject.id] || { count: 0, families: [] };
     
-    let importance: SubjectRecommendation['importance'] = 'low_relevance';
+    // Core subjects are compulsory for all students under CTGDPT 2018
+    if (subject.type === 'core') {
+      return {
+        subjectId: subject.id,
+        subjectName: subject.name,
+        subjectType: 'core',
+        importance: 'core_compulsory',
+        importanceLabel: 'Môn học bắt buộc (Core)',
+        supportingCareerFamilies: data.families,
+        reason: `Môn học bắt buộc theo Chương trình GDPT 2018. ${data.count > 0 ? `Đồng thời hỗ trợ đắc lực cho ${data.count} nhóm ngành bạn đang quan tâm.` : 'Cung cấp nền tảng học vấn toàn diện.'}`
+      };
+    }
+
+    let importance: SubjectPriority = 'low_relevance';
     let importanceLabel = 'Ít liên quan';
-    let reason = 'Không yêu cầu bởi các nhóm ngành bạn đang quan tâm.';
+    let reason = 'Không phải môn trọng tâm của các nhóm ngành bạn đang quan tâm.';
     
     if (data.count >= 3) {
-      importance = 'required';
-      importanceLabel = 'Ưu tiên cao';
-      reason = `Rất quan trọng, được yêu cầu bởi ${data.count} nhóm ngành bạn đang hướng tới.`;
+      importance = 'learning_priority_high';
+      importanceLabel = 'Ưu tiên học tập cao';
+      reason = `Rất quan trọng cho lộ trình phát triển năng lực của ${data.count} nhóm ngành bạn đang hướng tới.`;
     } else if (data.count === 2) {
-      importance = 'strongly_recommended';
-      importanceLabel = 'Nên chọn';
-      reason = 'Quan trọng, hỗ trợ tốt cho 2 nhóm ngành mục tiêu của bạn.';
+      importance = 'learning_priority_medium';
+      importanceLabel = 'Nên ưu tiên chọn';
+      reason = `Hỗ trợ tốt cho 2 nhóm ngành mục tiêu: ${data.families.join(', ')}.`;
     } else if (data.count === 1) {
-      importance = 'useful';
-      importanceLabel = 'Có ích';
-      reason = `Có ích nếu bạn muốn theo đuổi ${data.families[0]}.`;
+      importance = 'learning_priority_low';
+      importanceLabel = 'Có thể cân nhắc';
+      reason = `Bổ trợ kiến thức hữu ích nếu bạn theo đuổi ${data.families[0]}.`;
     }
 
     return {
       subjectId: subject.id,
       subjectName: subject.name,
+      subjectType: 'elective',
       importance,
       importanceLabel,
       supportingCareerFamilies: data.families,
@@ -62,11 +84,12 @@ export function generateSubjectPlan(
     };
   });
 
-  const order = {
-    'required': 1,
-    'strongly_recommended': 2,
-    'useful': 3,
-    'low_relevance': 4
+  const order: Record<SubjectPriority, number> = {
+    'core_compulsory': 1,
+    'learning_priority_high': 2,
+    'learning_priority_medium': 3,
+    'learning_priority_low': 4,
+    'low_relevance': 5
   };
 
   return recommendations.sort((a, b) => order[a.importance] - order[b.importance]);

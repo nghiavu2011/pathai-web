@@ -137,4 +137,35 @@ export class StorageService {
       console.error('Error deleting user data:', e);
     }
   }
+
+  public static clearAllData(): void {
+    try {
+      const keysToRemove: string[] = [];
+      if (typeof localStorage !== 'undefined') {
+        const len = localStorage.length || 0;
+        for (let i = 0; i < len; i++) {
+          const k = typeof localStorage.key === 'function' ? localStorage.key(i) : null;
+          if (k && !keysToRemove.includes(k)) {
+            keysToRemove.push(k);
+          }
+        }
+        for (const k of Object.keys(localStorage)) {
+          if (!keysToRemove.includes(k)) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach(k => {
+          if (k.startsWith('pathai:') || k === 'localUserProfile' || k === 'quizHistory' || k === 'goals' || k === 'privacyConsented') {
+            localStorage.removeItem(k);
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Error wiping all local data:', e);
+    }
+  }
 }
+
+
+
+

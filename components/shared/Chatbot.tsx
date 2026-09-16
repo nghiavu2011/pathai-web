@@ -42,12 +42,16 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
     setShowPrompts(false);
 
     try {
-      const responseContent = await AICounselService.sendChatMessage({
+      const responseResult = await AICounselService.sendChatMessage({
         messages: updatedHistory,
         systemInstruction
       });
 
-      setChatHistory(prev => [...prev, { role: 'model', content: responseContent }]);
+      const content = responseResult.status === 'PATHAI_FALLBACK' && responseResult.notice
+        ? `*[${responseResult.notice}]*\n\n${responseResult.data}`
+        : responseResult.data;
+
+      setChatHistory(prev => [...prev, { role: 'model', content }]);
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage = "Rất tiếc, đã có lỗi xảy ra khi kết nối trợ lý. Vui lòng thử lại.";
@@ -75,7 +79,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
           <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          Trò chuyện sâu hơn với Chuyên gia AI
+          Trò chuyện cùng Trợ lý AI Tham vấn (AI Counselor)
         </h3>
 
         <div ref={chatContainerRef} className="h-96 overflow-y-auto pr-2 space-y-4 mb-4 rounded-md bg-white dark:bg-slate-800/50 p-4 border dark:border-slate-700/50">
@@ -126,8 +130,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            placeholder={isPdfMode ? "Trò chuyện bị vô hiệu hóa khi tạo PDF" : (isChatLoading ? "Chuyên gia AI đang trả lời..." : "Đặt câu hỏi của bạn ở đây...")}
-            className="flex-1 px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 dark:text-white"
+            placeholder={isPdfMode ? "Trò chuyện bị vô hiệu hóa khi tạo PDF" : (isChatLoading ? "Trợ lý AI đang trả lời..." : "Đặt câu hỏi của bạn ở đây...")}
+            className="flex-1 px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 dark:text-white text-sm"
             disabled={isChatLoading || isPdfMode}
             aria-label="Chat input"
           />
@@ -142,6 +146,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ systemInstruction, initialMessage, su
             )}
           </button>
         </form>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center mt-3">
+          💡 Trợ lý AI hỗ trợ định hướng học tập & khám phá sở thích, không thay thế cho tư vấn y tế hay tâm lý lâm sàng.
+        </p>
         {isPdfMode && <p className="text-xs text-center mt-2 text-slate-500">Lưu ý: Thanh trò chuyện được mô phỏng trong PDF và không thể tương tác.</p>}
       </div>
     </div>

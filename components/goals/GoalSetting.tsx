@@ -25,13 +25,13 @@ const GoalSetting: React.FC<GoalSettingProps> = ({ quizId, quizTitle, results, o
       setError(null);
 
       try {
-        const goals = await AICounselService.getGoalSuggestions({
+        const goalsResult = await AICounselService.getGoalSuggestions({
           quizId,
           quizTitle,
           results,
         });
         if (isMounted) {
-          setSuggestedGoals(goals);
+          setSuggestedGoals(goalsResult.data);
         }
       } catch (err) {
         console.error("Error fetching goal suggestions:", err);

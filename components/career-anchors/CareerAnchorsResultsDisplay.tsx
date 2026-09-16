@@ -31,7 +31,7 @@ const CareerAnchorsResultsDisplay: React.FC<CareerAnchorsResultsDisplayProps> = 
 
   const resultsSummary = `Kết quả cho thấy 3 'mỏ neo' quan trọng nhất định hướng các quyết định sự nghiệp của bạn là: ${topAnchorsString}. Đây là những giá trị, động lực và nhu cầu cốt lõi mà bạn sẽ không muốn từ bỏ khi lựa chọn công việc.`;
 
-  const systemInstruction = `Bạn là một chuyên gia tư vấn sự nghiệp, am hiểu sâu sắc về lý thuyết Mỏ neo Nghề nghiệp (Career Anchors) của Edgar Schein. Dựa trên kết quả của người dùng, hãy phân tích ý nghĩa của các 'mỏ neo' nổi bật, giải thích sự xung đột có thể có giữa chúng, và gợi ý các loại hình công việc hoặc môi trường phù hợp. Kết quả của người dùng: ${JSON.stringify(results)}`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Động lực Nghề nghiệp PathAI (Mỏ neo Edgar Schein). Dựa trên kết quả của học sinh, hãy phân tích ý nghĩa các mỏ neo nổi bật, gợi ý các môi trường làm việc đáng khám phá và cách cân bằng nguyện vọng học tập. Kết quả: ${JSON.stringify(results)}`;
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, 'mỏ neo' sự nghiệp của bạn là ${topAnchorsString}. Chúng là la bàn nội tâm cho các quyết định của bạn. Bạn có muốn tìm hiểu sâu hơn về ý nghĩa của từng 'mỏ neo' hoặc khám phá xem chúng gợi ý điều gì về con đường sự nghiệp lý tưởng của bạn không?`;
 
   const topAnchorName = CAREER_ANCHORS_DETAILS[topThree[0].key].name;

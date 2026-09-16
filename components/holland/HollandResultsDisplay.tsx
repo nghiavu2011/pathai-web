@@ -30,9 +30,8 @@ const HollandResultsDisplay: React.FC<HollandResultsDisplayProps> = (props) => {
   const topThreeCodes = topThree.map(r => r.key).join('');
   const topThreeNames = topThree.map(r => RESULT_DETAILS[r.key].name).join(', ');
   
-  // Texts
-  const analysisContent = `Mật mã Holland của bạn là **${topThreeCodes}**, cho thấy bạn nổi bật ở các nhóm: **${topThreeNames}**. Điều này gợi ý rằng bạn có thể phù hợp với môi trường làm việc kết hợp giữa các yếu tố liên quan đến các nhóm này.`;
-  const systemInstruction = `Bạn là một chuyên gia tư vấn hướng nghiệp Holland (RIASEC). Phân tích kết quả: ${JSON.stringify(results)}. Đưa ra lời khuyên nghề nghiệp cụ thể.`;
+  const analysisContent = `Mật mã sở thích Holland của bạn là **${topThreeCodes}**, cho thấy bạn nổi bật ở các nhóm: **${topThreeNames}**. Kết quả này gợi ý những hướng ngành đáng khám phá để bạn tiếp tục kiểm chứng qua học tập và trải nghiệm thực tế.`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI. Phân tích kết quả sở thích RIASEC: ${JSON.stringify(results)}. Đưa ra các gợi ý ngành học và môn học THPT cần chú trọng dưới dạng giả thuyết để học sinh kiểm chứng, không áp đặt kết luận mang tính số mệnh.`;
   const initialMessage = `Xin chào ${userData?.fullName || 'bạn'}, mật mã Holland của bạn là **${topThreeCodes}**. Bạn có muốn tôi phân tích sâu hơn về các nhóm tính cách này và gợi ý nghề nghiệp phù hợp không?`;
   const topThreeNamesForSearch = topThree.map(r => RESULT_DETAILS[r.key].name.split('(')[0].trim()).join(', ');
   const newsQuery = `xu hướng và lời khuyên nghề nghiệp cho các nhóm sở thích ${topThreeNamesForSearch}`;

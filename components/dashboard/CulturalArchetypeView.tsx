@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CategoryKey } from '../../types';
 import { synthesizeEasternArchetype } from '../../data/engines/archetypeEngine';
 import { EASTERN_ARCHETYPES, ELEMENT_TEMPERAMENTS } from '../../data/archetypesData';
@@ -29,20 +29,21 @@ export const CulturalArchetypeView: React.FC<CulturalArchetypeViewProps> = ({
 
   return (
     <div className="space-y-8 animate-slow-fade">
-      {/* Academic Header Banner */}
+      {/* Cultural Reflection Header Banner */}
       <div className="bg-gradient-to-r from-amber-900/90 via-slate-800 to-sage-900 text-white p-8 rounded-[32px] border border-amber-500/30 shadow-2xl relative overflow-hidden">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400/20 text-amber-200 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>🏛️ Học thuyết Tâm lý Phân tích & Bản sắc Đông phương</span>
+            <span>🏛️ Khám phá Góc nhìn Văn hóa & Khí chất (Cultural Reflection)</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-display font-bold text-amber-100">
-            Khuôn Mẫu Khí Chất & Gương Soi Tâm Lý
+            Khuôn Mẫu Khí Chất & Gương Soi Tự Phản Ánh
           </h2>
           <p className="text-slate-300 text-sm font-light leading-relaxed">
-            Sự giao thoa học thuật giữa <strong>Lý thuyết Nguyên mẫu của Carl Jung (Jungian Archetypes)</strong>, 
-            trắc nghiệm sở thích RIASEC và <strong>14 Khuôn mẫu Khí chất Đông phương</strong>. 
-            Giúp bạn thấu hiểu thiên bẩm, nhận diện điểm mù tâm lý để phát triển bản thân trọn vẹn.
+            Góc nhìn giao thoa giữa <strong>Lý thuyết Nguyên mẫu của Carl Jung (Jungian Archetypes)</strong> và <strong>14 Khuôn mẫu Khí chất Đông phương</strong>, giúp học sinh có thêm một góc nhìn triết học để suy ngẫm và phát triển bản thân.
           </p>
+          <div className="p-3 bg-amber-500/10 border border-amber-400/30 rounded-xl text-xs text-amber-200/90 mt-3 font-normal">
+            ⚠️ <strong>Lưu ý quan trọng:</strong> Nội dung này mang tính tham khảo văn hóa và tự suy ngẫm, không phải công cụ chẩn đoán tâm lý khoa học và không được sử dụng để chọn môn, ngành, trường hoặc đánh giá năng lực học sinh.
+          </div>
         </div>
       </div>
 

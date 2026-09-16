@@ -1,4 +1,4 @@
-﻿import { CategoryKey } from '../../types';
+import { CategoryKey } from '../../types';
 
 export type ArchetypeGroup = 
   | 'tu_phu_vu_tuong' // Tử Phủ Vũ Tướng (Quản trị & Kiến tạo)
@@ -40,7 +40,6 @@ export interface ArchetypeSynthesis {
   dominantStar: EasternStarArchetype;
   secondaryStar?: EasternStarArchetype;
   dominantElement: ElementTemperament;
-  riasecAlignmentScore: number; // 0-100
   synthesisNarrative: string;
   actionableInsights: {
     naturalTalent: string;

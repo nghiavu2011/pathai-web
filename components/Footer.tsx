@@ -4,6 +4,7 @@ import DisclaimerModal from './DisclaimerModal';
 
 interface FooterProps {
     onOpenDonationModal: () => void;
+    onNavigate?: (path: string) => void;
 }
 
 const SocialLink: React.FC<{ href: string; ariaLabel: string; icon: React.ReactNode }> = ({ href, ariaLabel, icon }) => (
@@ -28,8 +29,9 @@ const ContactLink: React.FC<{ href: string; ariaLabel: string; icon: React.React
     </a>
 );
 
-const Footer: React.FC<FooterProps> = ({ onOpenDonationModal }) => {
+const Footer: React.FC<FooterProps> = ({ onOpenDonationModal, onNavigate }) => {
     const [isDisclaimerOpen, setDisclaimerOpen] = useState(false);
+    const [disclaimerTab, setDisclaimerTab] = useState<'terms' | 'methodology' | 'safety' | 'privacy' | 'sources'>('terms');
 
     return (
         <footer className="bg-sage-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 py-16 px-4 border-t border-sage-200 dark:border-slate-800 mt-24 transition-colors duration-300 font-sans relative overflow-hidden">
@@ -122,18 +124,76 @@ const Footer: React.FC<FooterProps> = ({ onOpenDonationModal }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <button 
-                            onClick={() => setDisclaimerOpen(true)}
+                    <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2">
+                        <a 
+                            href="/methodology"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/methodology');
+                                }
+                            }}
                             className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
                         >
-                            Miễn trừ trách nhiệm & Bảo mật
-                        </button>
+                            Phương pháp khoa học
+                        </a>
+                        <a 
+                            href="/ai-safety"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/ai-safety');
+                                }
+                            }}
+                            className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
+                        >
+                            An toàn AI
+                        </a>
+                        <a 
+                            href="/privacy"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/privacy');
+                                }
+                            }}
+                            className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
+                        >
+                            Bảo mật dữ liệu
+                        </a>
+                        <a 
+                            href="/data-sources"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/data-sources');
+                                }
+                            }}
+                            className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
+                        >
+                            Nguồn tuyển sinh 2026
+                        </a>
+                        <a 
+                            href="/terms"
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('/terms');
+                                }
+                            }}
+                            className="text-slate-500 hover:text-sage-600 dark:hover:text-sage-400 underline decoration-dotted underline-offset-4 transition-colors"
+                        >
+                            Miễn trừ trách nhiệm
+                        </a>
                     </div>
                 </div>
             </div>
             
-            <DisclaimerModal isOpen={isDisclaimerOpen} onClose={() => setDisclaimerOpen(false)} />
+            <DisclaimerModal 
+                isOpen={isDisclaimerOpen} 
+                defaultTab={disclaimerTab}
+                onClose={() => setDisclaimerOpen(false)} 
+            />
         </footer>
     );
 };

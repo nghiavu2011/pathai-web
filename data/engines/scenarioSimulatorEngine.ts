@@ -1,4 +1,4 @@
-﻿import { StudentScoreProfile, ProgramMatchResult } from '../types/admissions';
+import { StudentScoreProfile, ProgramMatchResult } from '../types/admissions';
 import { matchUniversityPrograms } from './universityMatchingEngine';
 
 export interface ScoreDeltaScenario {
@@ -8,6 +8,7 @@ export interface ScoreDeltaScenario {
   targetToSafeCount: number;
   newlyUnlockedPrograms: string[];
   effortRequired: 'Low' | 'Medium' | 'High';
+  isHypotheticalBaseline: boolean;
   marginalGainSummary: string;
 }
 
@@ -20,52 +21,64 @@ export function simulateScenarios(
 
   const scenarios: ScoreDeltaScenario[] = [];
 
-  // Scenario 1: Boost TSA by +8 points (e.g. 68 -> 76)
-  const currentTsa = baseProfile.tsaScore || 68;
+  // Scenario 1: Boost TSA by +8 points
+  const hasActualTsa = baseProfile.tsaScore !== undefined && baseProfile.tsaScore !== null;
+  const currentTsa = hasActualTsa ? (baseProfile.tsaScore as number) : 65;
   const boostedTsaProfile: StudentScoreProfile = {
     ...baseProfile,
     tsaScore: Math.min(100, currentTsa + 8)
   };
   const tsaMatches = matchUniversityPrograms(boostedTsaProfile, targetCareerFamilyIds);
   scenarios.push(calculateDelta(
-    `Tăng điểm TSA (+8 điểm: ${currentTsa} ➔ ${boostedTsaProfile.tsaScore})`,
+    hasActualTsa
+      ? `Bứt phá TSA (+8 điểm: ${currentTsa} ➔ ${boostedTsaProfile.tsaScore}đ)`
+      : `Mô phỏng kỳ vọng TSA (+8 điểm giả định: 65 ➔ 73đ)`,
     boostedTsaProfile,
     baseMap,
     tsaMatches,
-    'Medium'
+    'Medium',
+    !hasActualTsa
   ));
 
-  // Scenario 2: Boost IELTS by +0.5 (e.g. 6.0 -> 6.5 or 6.5 -> 7.0)
-  const currentIelts = baseProfile.ieltsScore || 6.0;
+  // Scenario 2: Boost IELTS by +0.5
+  const hasActualIelts = baseProfile.ieltsScore !== undefined && baseProfile.ieltsScore !== null;
+  const currentIelts = hasActualIelts ? (baseProfile.ieltsScore as number) : 6.0;
   const boostedIeltsProfile: StudentScoreProfile = {
     ...baseProfile,
     ieltsScore: Math.min(9.0, currentIelts + 0.5)
   };
   const ieltsMatches = matchUniversityPrograms(boostedIeltsProfile, targetCareerFamilyIds);
   scenarios.push(calculateDelta(
-    `Nâng band IELTS (+0.5 band: ${currentIelts} ➔ ${boostedIeltsProfile.ieltsScore})`,
+    hasActualIelts
+      ? `Nâng band IELTS (+0.5 band: ${currentIelts} ➔ ${boostedIeltsProfile.ieltsScore})`
+      : `Mô phỏng kỳ vọng IELTS (+0.5 band giả định: 6.0 ➔ 6.5)`,
     boostedIeltsProfile,
     baseMap,
     ieltsMatches,
-    'Medium'
+    'Medium',
+    !hasActualIelts
   ));
 
-  // Scenario 3: Boost Math THPT by +0.8 (e.g. 8.0 -> 8.8)
-  const currentMath = baseProfile.thptScores['toan'] || 8.0;
+  // Scenario 3: Boost Math THPT by +0.8
+  const hasActualMath = baseProfile.thptScores && baseProfile.thptScores['toan'] !== undefined;
+  const currentMath = hasActualMath ? baseProfile.thptScores['toan'] : 7.5;
   const boostedMathProfile: StudentScoreProfile = {
     ...baseProfile,
     thptScores: {
-      ...baseProfile.thptScores,
+      ...(baseProfile.thptScores || {}),
       toan: Math.min(10, currentMath + 0.8)
     }
   };
   const mathMatches = matchUniversityPrograms(boostedMathProfile, targetCareerFamilyIds);
   scenarios.push(calculateDelta(
-    `Bứt phá môn Toán THPT (+0.8 điểm: ${currentMath} ➔ ${boostedMathProfile.thptScores['toan']})`,
+    hasActualMath
+      ? `Bứt phá môn Toán THPT (+0.8 điểm: ${currentMath} ➔ ${boostedMathProfile.thptScores['toan']})`
+      : `Mô phỏng kỳ vọng môn Toán (+0.8 điểm giả định: 7.5 ➔ 8.3)`,
     boostedMathProfile,
     baseMap,
     mathMatches,
-    'Medium'
+    'Medium',
+    !hasActualMath
   ));
 
   return scenarios;
@@ -76,7 +89,8 @@ function calculateDelta(
   profile: StudentScoreProfile,
   baseMap: Map<string, ProgramMatchResult>,
   newMatches: ProgramMatchResult[],
-  effort: 'Low' | 'Medium' | 'High'
+  effort: 'Low' | 'Medium' | 'High',
+  isHypothetical: boolean
 ): ScoreDeltaScenario {
   let dreamToTarget = 0;
   let targetToSafe = 0;
@@ -99,8 +113,8 @@ function calculateDelta(
 
   const totalImpact = dreamToTarget + targetToSafe;
   const summary = totalImpact > 0
-    ? `Giúp chuyển đổi ${dreamToTarget} ngành từ Thử thách sang Mục tiêu và ${targetToSafe} ngành sang An toàn.`
-    : 'Cải thiện biên độ an toàn tổng thể của các ngành hiện tại.';
+    ? `Mở rộng biên độ an toàn, chuyển dịch ${dreamToTarget} ngành sang Mục tiêu và ${targetToSafe} ngành sang An toàn.`
+    : 'Cải thiện chỉ số cạnh tranh học thuật tổng thể.';
 
   return {
     parameterName: name,
@@ -109,6 +123,7 @@ function calculateDelta(
     targetToSafeCount: targetToSafe,
     newlyUnlockedPrograms: newlyUnlocked,
     effortRequired: effort,
+    isHypotheticalBaseline: isHypothetical,
     marginalGainSummary: summary
   };
 }

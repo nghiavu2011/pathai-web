@@ -13,10 +13,12 @@ interface HeaderProps {
   userData: UserData | null;
   onViewHistory: () => void;
   onViewGoals: () => void;
+  onOpenDecisionDashboard?: () => void;
   onLogout: () => void;
+  onLoginClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme, showProgress, onGoHome, userData, onViewHistory, onViewGoals, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme, showProgress, onGoHome, userData, onViewHistory, onViewGoals, onLogout, onLoginClick }) => {
   return (
     <header className="fixed top-6 left-0 right-0 z-50 px-4 md:px-0">
       <div className="container mx-auto max-w-6xl">
@@ -66,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme,
             
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             
-            {userData && (
+            {userData ? (
               <div className="flex items-center ml-2 space-x-2">
                   <div className="hidden md:block text-right">
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{userData.fullName}</p>
@@ -88,6 +90,15 @@ const Header: React.FC<HeaderProps> = ({ currentStep, steps, theme, toggleTheme,
                     </svg>
                   </button>
               </div>
+            ) : (
+              onLoginClick && (
+                <button
+                  onClick={onLoginClick}
+                  className="ml-2 px-3 py-1.5 rounded-full bg-sage-50 hover:bg-sage-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-sage-700 dark:text-sage-300 font-semibold text-xs border border-sage-200 dark:border-slate-700 transition-all"
+                >
+                  Tạo hồ sơ
+                </button>
+              )
             )}
           </div>
         </div>

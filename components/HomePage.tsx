@@ -10,7 +10,6 @@ interface HomePageProps {
     onOpenQuizInfo: (id: string) => void;
     onOpenDecisionDashboard?: () => void;
     history?: QuizHistoryEntry[];
-    canShowSynthesis?: boolean;
     userData?: UserData | null;
 }
 
@@ -20,10 +19,8 @@ const HomePage: React.FC<HomePageProps> = ({
     onOpenQuizInfo,
     onOpenDecisionDashboard,
     history = [],
-    canShowSynthesis = false,
     userData = null
 }) => {
-    const [isSynthesisOpen, setSynthesisOpen] = React.useState(false);
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
@@ -267,83 +264,71 @@ const HomePage: React.FC<HomePageProps> = ({
                 </div>
             </section>
 
-            {/* --- GRAND SYNTHESIS (Experimental/Unlocked) --- */}
-            {canShowSynthesis && (
-                <section className="py-32 bg-gradient-to-b from-slate-900 to-black text-white relative overflow-hidden">
-                    {/* Zen Particles Background */}
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+            {/* --- PROFILE READINESS & DECISION HUB CTA --- */}
+            <section className="py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-sage-950 text-white relative overflow-hidden">
+                <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#899B8E_1px,transparent_1px)] [background-size:24px_24px]"></div>
 
-                    <div className="container mx-auto px-4 max-w-4xl text-center relative z-10 animate-slow-fade">
-                        <div className="inline-block px-4 py-1.5 rounded-full border border-accent/40 bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-[0.3em] mb-8">
-                            Hành trình đã trọn vẹn
-                        </div>
-                        <h2 className="font-display text-5xl md:text-7xl font-bold mb-10 leading-tight">
-                            Mở ra <span className="text-accent italic">chân trời mới</span>
-                        </h2>
-                        <p className="text-slate-300 text-xl leading-relaxed font-light mb-16 max-w-2xl mx-auto">
-                            Chúc mừng **{userData?.fullName}**! Bạn đã hoàn thành các chặng khám phá then chốt. PathAI đã đủ dữ liệu để phác họa một bức tranh tổng thể và đột phá về con người bạn.
-                        </p>
-
-                        <button
-                            onClick={() => setSynthesisOpen(true)}
-                            className="group relative px-12 py-6 bg-accent text-white rounded-full font-bold text-lg tracking-widest uppercase hover:bg-accent-dark transition-all transform hover:scale-105 shadow-2xl shadow-accent/20"
-                        >
-                            <span className="relative z-10">Xem Tổng hợp Hành trình</span>
-                            <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
-                        </button>
-                    </div>
-                </section>
-            )}
-
-            {/* Synthesis Modal (Simplified Logic) */}
-            {isSynthesisOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-fade-in bg-black/95 backdrop-blur-xl overflow-y-auto">
-                    <div className="w-full max-w-5xl bg-slate-900 rounded-[2.5rem] border border-white/5 p-8 md:p-16 my-auto relative">
-                        <button
-                            onClick={() => setSynthesisOpen(false)}
-                            className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-
-                        <div className="max-w-3xl mx-auto">
-                            <div className="text-center mb-16">
-                                <span className="text-accent font-bold tracking-[0.5em] text-[10px] uppercase mb-4 block">Hành trình tổng hợp</span>
-                                <h2 className="text-4xl md:text-6xl font-display font-bold text-white leading-tight">Phác đồ cuộc sống & <br /> Phiên bản hoàn hảo</h2>
-                            </div>
-
-                            <div className="prose prose-invert prose-lg max-w-none text-slate-300 leading-[2] font-light space-y-8">
-                                <p>
-                                    Chào <strong>{userData?.fullName}</strong>, đây là thời khắc quan trọng trong hành trình của bạn.
-                                    Dựa trên bối cảnh sống là <strong>{userData?.maritalStatus?.toLowerCase()}</strong>, <strong>{userData?.birthOrder?.toLowerCase()}</strong> và những khát khao bạn hằng ấp ủ,
-                                    tôi nhận thấy một hành trình rực rỡ đang mở ra trước mắt.
-                                </p>
-                                <p>
-                                    Thông tin từ 3 chặng vừa qua cho thấy bạn không chỉ sở hữu những tố chất thông minh đa diện, mà còn đang học cách cân bằng giữa thực tại và giấc mơ.
-                                    Với mục tiêu <em>"{userData?.expectations}"</em>, lời khuyên chân thành nhất dành cho bạn là hãy tập trung vào <strong>sự nhất quán giữa thân - tâm - trí</strong>.
-                                </p>
-                                <div className="p-8 rounded-3xl bg-accent/5 border border-accent/20 italic text-accent-light text-center text-2xl font-serif">
-                                    "Bạn không cần phải hoàn hảo để bắt đầu, nhưng bạn cần bắt đầu để trở nên hoàn hảo nhất theo cách của riêng mình."
+                <div className="container mx-auto px-4 max-w-5xl relative z-10">
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-md">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 border-b border-white/10 pb-6">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    Hồ Sơ Hướng Nghiệp & Ra Quyết Định
                                 </div>
-                                <p>
-                                    Hãy tiếp tục duy trì <strong>tinh thần cầu tiến (Growth Mindset)</strong> và sự kiên trì đã được kiểm chứng.
-                                    Chân trời mới đã mở, và bạn chính là kiến trúc sư vĩ đại nhất của cuộc đời mình.
+                                <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
+                                    Trung Tâm Ra Quyết Định Lớp 9–12
+                                </h2>
+                                <p className="text-slate-300 text-sm md:text-base mt-2 max-w-xl">
+                                    Tổng hợp dữ liệu trắc nghiệm, phân tích rủi ro đóng cửa ngành, lập tổ hợp môn CTGDPT 2018 và đối chiếu phương thức xét tuyển ĐH.
                                 </p>
                             </div>
 
-                            <div className="mt-20 pt-10 border-t border-white/5 flex flex-col items-center">
-                                <p className="text-slate-500 text-sm italic mb-8">Đây là tóm tắt dựa trên các chỉ số hiện có. Bạn có thể sử dụng Chatbot ở từng chặng để hỏi sâu hơn về phác đồ chi tiết.</p>
-                                <button
-                                    onClick={() => setSynthesisOpen(false)}
-                                    className="px-10 py-4 border border-white/20 text-white rounded-full font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
-                                >
-                                    Trở lại hành trình
-                                </button>
+                            <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                                <div className="text-xs text-slate-400">Tiến độ dữ liệu hồ sơ:</div>
+                                <div className="text-2xl font-black text-accent">
+                                    {history.length} / 11 Bài trắc nghiệm
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Status Checkpoints */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className={`p-4 rounded-2xl border ${history.some(h => h.quizId === 'holland') ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300' : 'bg-white/5 border-white/5 text-slate-400'}`}>
+                                <div className="text-xs font-semibold mb-1">1. Hướng nghiệp RIASEC</div>
+                                <div className="text-sm font-bold">{history.some(h => h.quizId === 'holland') ? '✓ Đã hoàn thành' : '○ Chưa thực hiện'}</div>
+                            </div>
+                            <div className={`p-4 rounded-2xl border ${history.some(h => ['mi', 'big-five', 'eq'].includes(h.quizId)) ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300' : 'bg-white/5 border-white/5 text-slate-400'}`}>
+                                <div className="text-xs font-semibold mb-1">2. Năng lực & Tính cách</div>
+                                <div className="text-sm font-bold">{history.some(h => ['mi', 'big-five', 'eq'].includes(h.quizId)) ? '✓ Đã cập nhật' : '○ Chưa thực hiện'}</div>
+                            </div>
+                            <div className={`p-4 rounded-2xl border ${history.some(h => ['work-values', 'schein', 'wheel', 'cdb'].includes(h.quizId)) ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300' : 'bg-white/5 border-white/5 text-slate-400'}`}>
+                                <div className="text-xs font-semibold mb-1">3. Giá trị nghề nghiệp</div>
+                                <div className="text-sm font-bold">{history.some(h => ['work-values', 'schein', 'wheel', 'cdb'].includes(h.quizId)) ? '✓ Đã cập nhật' : '○ Chưa thực hiện'}</div>
+                            </div>
+                            <div className={`p-4 rounded-2xl border ${history.some(h => ['grit', 'crs', 'gms'].includes(h.quizId)) ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300' : 'bg-white/5 border-white/5 text-slate-400'}`}>
+                                <div className="text-xs font-semibold mb-1">4. Ý chí & Động lực</div>
+                                <div className="text-sm font-bold">{history.some(h => ['grit', 'crs', 'gms'].includes(h.quizId)) ? '✓ Đã cập nhật' : '○ Chưa thực hiện'}</div>
+                            </div>
+                        </div>
+
+                        {/* CTA Button */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                            <p className="text-xs text-slate-400">
+                                Dữ liệu được tính toán thời gian thực theo cấu trúc điểm tuyển sinh và chương trình GDPT 2018 mới nhất.
+                            </p>
+                            {onOpenDecisionDashboard && (
+                                <button
+                                    onClick={onOpenDecisionDashboard}
+                                    className="w-full sm:w-auto px-8 py-4 bg-accent hover:bg-accent-dark text-white rounded-2xl font-bold text-sm tracking-wider uppercase transition-all transform hover:scale-[1.02] shadow-xl shadow-accent/20 shrink-0"
+                                >
+                                    Mở Trung Tâm Ra Quyết Định →
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
-            )}
+            </section>
 
         </div>
     );

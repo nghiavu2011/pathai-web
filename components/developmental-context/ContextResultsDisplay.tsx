@@ -31,9 +31,9 @@ const ContextResultsDisplay: React.FC<ContextResultsDisplayProps> = (props) => {
   
   Ngoài ra, chỉ số **Tự chủ** đạt **${results.scores[ContextCategoryKey.AUT].toFixed(1)}/5.0**, và mức độ **Ổn định Môi trường** đạt **${results.scores[ContextCategoryKey.ENV].toFixed(1)}/5.0**.`;
 
-  const systemInstruction = `Bạn là một chuyên gia tâm lý học phát triển và hướng nghiệp. Dựa trên Hồ sơ Nền tảng (Developmental Context Profile) của người dùng, hãy phân tích sâu về mối liên hệ giữa kiểu gắn bó (${results.attachmentStyle}) và cách họ làm việc, lãnh đạo hoặc đối mặt với rủi ro. Hãy đưa ra lời khuyên nhẹ nhàng, mang tính chữa lành và xây dựng. Kết quả: ${JSON.stringify(results)}`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI. Dựa trên Hồ sơ Khám phá Nền tảng Cá nhân (Developmental Context Profile) của học sinh, hãy phân tích mang tính khám phá về cách xu hướng gắn bó (${results.attachmentStyle}) và mức độ tự chủ ảnh hưởng đến môi trường học tập, làm việc nhóm hoặc cách đối mặt thử thách. Đưa ra gợi ý mang tính xây dựng, rèn luyện kỹ năng, phi phán xét và không ấn định tương lai. Kết quả: ${JSON.stringify(results)}`;
   
-  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, hồ sơ cho thấy bạn có xu hướng **${attachmentDetails.label}**. Hiểu được điều này là chìa khóa để chọn môi trường làm việc giúp bạn cảm thấy an toàn và phát huy hết tiềm năng. Bạn có muốn tìm hiểu xem kiểu gắn bó này ảnh hưởng thế nào đến cách bạn làm việc nhóm hoặc đối mặt với áp lực không?`;
+  const initialMessage = `Chào ${userData?.fullName || 'bạn'}, hồ sơ cho thấy bạn có xu hướng **${attachmentDetails.label}**. Hiểu được đặc điểm này sẽ giúp bạn chủ động chọn môi trường học tập và làm việc nhóm phù hợp để phát huy năng lực. Bạn có muốn cùng mình khám phá các cách rèn luyện kỹ năng giao tiếp và thích ứng trong môi trường mới không?`;
 
   const newsQuery = `đặc điểm và lời khuyên nghề nghiệp cho người có kiểu gắn bó ${results.attachmentStyle} (attachment style)`;
 

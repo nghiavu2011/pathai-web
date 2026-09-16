@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { StudentScoreProfile } from '../../data/types/admissions';
 import { evaluateExamStrategy } from '../../data/engines/examStrategyEngine';
 import { ADMISSION_PROGRAMS } from '../../data/admissionsData';
@@ -53,10 +53,10 @@ export const ExamStrategyView: React.FC<ExamStrategyViewProps> = ({
               )}
             </div>
 
-            <div className="flex md:flex-col items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl w-full md:w-36 text-center">
-              <span className="text-xs text-slate-400 font-medium">Chỉ số ROI</span>
-              <span className="text-2xl font-extrabold text-sage-600 dark:text-sage-400">{strat.roiScore}%</span>
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">Nỗ lực: {strat.effortCost}</span>
+            <div className="flex md:flex-col items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl w-full md:w-44 text-center">
+              <span className="text-xs text-slate-400 font-medium">Đánh giá Hiệu quả (ROI)</span>
+              <span className="text-sm font-extrabold text-sage-600 dark:text-sage-400 my-1">{strat.roiLevelLabel}</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">Mức nỗ lực: {strat.effortCost}</span>
             </div>
           </div>
         ))}

@@ -24,7 +24,7 @@ const GritResultsDisplay: React.FC<GritResultsDisplayProps> = (props) => {
   
   const resultsSummary = `Điểm Bền chí (Grit) tổng thể của bạn là **${results.grit.toFixed(1)}/5.0**, ở mức **${gritClassification?.level}**. Điều này cho thấy bạn là người **${gritClassification?.description}**. Điểm số này được tổng hợp từ hai yếu tố: **Sự kiên trì nỗ lực (${results.effort.toFixed(1)})** và **Sự ổn định đam mê (${results.interest.toFixed(1)})**.`;
 
-  const systemInstruction = `Bạn là một chuyên gia về tâm lý học thành công và phát triển cá nhân, am hiểu về Thang đo Bền chí (Grit Scale) của Angela Duckworth. Dựa trên kết quả của người dùng, hãy giải thích ý nghĩa, đưa ra các chiến lược cụ thể để cải thiện sự bền bỉ và đam mê, đồng thời gợi ý môi trường làm việc phù hợp. Kết quả của người dùng là: ${JSON.stringify(results)}`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Rèn luyện Ý chí & Động lực PathAI (Grit Scale - Angela Duckworth). Dựa trên kết quả tự đánh giá của học sinh, hãy giải thích ý nghĩa và gợi ý các thói quen học tập nhỏ để duy trì động lực, không gán nhãn cố định năng lực. Kết quả của học sinh là: ${JSON.stringify(results)}`;
   const initialMessage = `Xin chào ${userData?.fullName || 'bạn'}, điểm Bền chí của bạn là **${results.grit.toFixed(1)}**, ở mức **${gritClassification?.level}**. Đây là một chỉ số quan trọng cho thành công dài hạn. Bạn có muốn tìm hiểu cách để rèn luyện sự bền bỉ hoặc khám phá môi trường nào sẽ giúp bạn phát huy tốt nhất phẩm chất này không?`;
   
   const newsQuery = "bài viết về cách rèn luyện sự bền bỉ và đam mê trong công việc và học tập";

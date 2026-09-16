@@ -33,7 +33,7 @@ const CDIResultsDisplay: React.FC<CDIResultsDisplayProps> = (props) => {
 
   const resultsSummary = `Rào cản lớn nhất bạn đang gặp phải thuộc nhóm **${CDB_RESULT_DETAILS[mainBarrier.key].name}** với mức độ **${getClassification(mainBarrier.score)}**. Điều này cho thấy bạn có thể cần tập trung vào việc ${mainBarrier.key === 'A' ? 'khám phá và hiểu rõ hơn về bản thân' : mainBarrier.key === 'B' ? 'tìm kiếm và xử lý thông tin nghề nghiệp' : mainBarrier.key === 'C' ? 'xây dựng sự tự tin và kỹ năng ra quyết định' : mainBarrier.key === 'D' ? 'nhận diện và quản lý các ảnh hưởng từ bên ngoài' : 'trang bị các kỹ năng cần thiết cho sự nghiệp'}.`;
 
-  const systemInstruction = `Bạn là một chuyên gia tư vấn hướng nghiệp, chuyên sâu về việc tháo gỡ các rào cản nghề nghiệp. Dựa trên kết quả đánh giá các khó khăn của người dùng, hãy đưa ra những phân tích, lời khuyên thực tế và các bước hành động cụ thể. Kết quả của người dùng là: ${JSON.stringify(results)}`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Tháo gỡ Rào cản Hướng nghiệp PathAI (Mô hình Itamar Gati). Dựa trên kết quả tự đánh giá khó khăn của học sinh, hãy đưa ra những phân tích đồng cảm, lời khuyên thực tế và các bước hành động cụ thể để học sinh tự tin hơn. Kết quả: ${JSON.stringify(results)}`;
   const initialMessage = `Xin chào ${userData?.fullName || 'bạn'}, kết quả cho thấy rào cản lớn nhất của bạn là **${CDB_RESULT_DETAILS[mainBarrier.key].name}**. Đây là một bước nhận diện quan trọng. Bạn có muốn thảo luận sâu hơn về cách để vượt qua rào cản này không?`;
 
   const newsQuery = `cách vượt qua rào cản nghề nghiệp về ${CDB_RESULT_DETAILS[mainBarrier.key].name}`;

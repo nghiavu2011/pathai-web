@@ -6,29 +6,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO Meta Tags -->
-  <title>PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai (Lớp 9–12)</title>
+  <title>PathAI | Hướng nghiệp cho học sinh lớp 9–12</title>
   <meta name="description"
-    content="Hệ thống định hướng hướng nghiệp và quyết định học tập cho học sinh THPT: Trắc nghiệm tâm lý khoa học (Holland, Big Five, Gardner MI, Schein), Lập kế hoạch chọn môn lớp 10 (GDPT 2018), Chiến lược thi ĐGNL/TSA/SAT và Mô phỏng tương lai." />
+    content="PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập, thử nghiệm lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai." />
   <meta name="keywords"
-    content="trắc nghiệm tính cách, định hướng nghề nghiệp, chọn môn lớp 10, GDPT 2018, ĐGNL, TSA, SAT, holland RIASEC, Big Five, PathAI, hướng nghiệp học sinh" />
+    content="hướng nghiệp học sinh, trắc nghiệm RIASEC, chọn tổ hợp môn lớp 10, GDPT 2018, xét tuyển đại học 2026, ĐGNL, TSA, HSA, PathAI Career" />
   <meta name="author" content="PathAI Team" />
   <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pathai-web-intro.vercel.app/" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://pathai-web-intro.vercel.app/" />
-  <meta property="og:title" content="PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai" />
+  <meta property="og:site_name" content="PathAI Career" />
+  <meta property="og:title" content="PathAI | Hướng nghiệp cho học sinh lớp 9–12" />
   <meta property="og:description"
-    content="Khi bạn chưa biết mình sẽ đi đâu, hãy bắt đầu bằng việc hiểu chính mình. Khám phá 11 bài trắc nghiệm và bản đồ định hướng lớp 9–12!" />
-  <meta property="og:image" content="/zen_nature_1_1768643740914.png" />
+    content="PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập, thử nghiệm lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai." />
+  <meta property="og:image" content="https://pathai-web-intro.vercel.app/zen_nature_1_1768643740914.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://pathai-web-intro.vercel.app/" />
-  <meta property="twitter:title" content="PathAI - Hành trình Thấu hiểu Bản thân & Định hướng Tương lai" />
+  <meta property="twitter:title" content="PathAI | Hướng nghiệp cho học sinh lớp 9–12" />
   <meta property="twitter:description"
-    content="Khám phá bản thân và xây dựng lộ trình sự nghiệp vững chắc cùng PathAI." />
-  <meta property="twitter:image" content="/zen_nature_1_1768643740914.png" />
+    content="PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập, thử nghiệm lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai." />
+  <meta property="twitter:image" content="https://pathai-web-intro.vercel.app/zen_nature_1_1768643740914.png" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,21 +61,21 @@
               200: '#C5D3C9',
               300: '#A3B9A9',
               400: '#829E8A',
-              500: '#64826C', // Primary Green
-              600: '#4A6753', // Deep Green (Icon color)
+              500: '#64826C',
+              600: '#4A6753',
               700: '#354D3D',
               800: '#24352A',
               900: '#162019',
             },
             'cream': {
               50: '#FFFEFC',
-              100: '#F9F7F2', // Warm Background
+              100: '#F9F7F2',
               200: '#F0EBE0',
               300: '#E6DCC9',
             },
             'accent': {
               light: '#D4C5A8',
-              DEFAULT: '#BFA575', // Gold/Bronze accent
+              DEFAULT: '#BFA575',
               dark: '#967D50',
             }
           },
@@ -149,7 +153,88 @@
 </head>
 
 <body class="dark:bg-slate-900 dark:text-slate-300">
-  <div id="root"></div>
+  <div id="root">
+    <!-- Semantic Pre-rendered HTML for Search Engine Crawlers & Fast Initial Content -->
+    <header class="container mx-auto px-6 py-8 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl font-bold font-display text-slate-900 dark:text-white">PathAI</span>
+        <span class="text-xs text-slate-500 font-medium tracking-wide">| Hướng nghiệp Lớp 9–12</span>
+      </div>
+      <nav class="hidden md:flex space-x-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
+        <a href="/methodology" class="hover:text-sage-600">Phương pháp</a>
+        <a href="/ai-safety" class="hover:text-sage-600">An toàn AI</a>
+        <a href="/data-sources" class="hover:text-sage-600">Nguồn tuyển sinh</a>
+        <a href="/privacy" class="hover:text-sage-600">Bảo mật</a>
+        <a href="/terms" class="hover:text-sage-600">Điều khoản</a>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 max-w-5xl">
+      <!-- Hero Section -->
+      <section class="text-center py-12">
+        <span class="inline-block py-1.5 px-4 border border-sage-300 rounded-full text-sage-800 dark:text-sage-300 text-xs font-bold tracking-widest uppercase mb-6">
+          Hành trình khai phá tiềm năng
+        </span>
+        <h1 class="font-display text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
+          Hiểu mình hơn. Khám phá nghề nghiệp có cơ sở hơn.
+        </h1>
+        <p class="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8">
+          PathAI giúp học sinh lớp 9–12 hiểu sở thích nghề nghiệp, khám phá các hướng học tập, thử nghiệm lựa chọn và trao đổi cùng gia đình trước khi quyết định tương lai.
+        </p>
+      </section>
+
+      <!-- Assessments Section -->
+      <section class="py-12 border-t border-slate-200 dark:border-slate-800">
+        <h2 class="text-2xl font-bold font-display text-slate-900 dark:text-white mb-4">Hệ Thống 11 Công Cụ Đánh Giá Hướng Nghiệp Chuẩn Hóa</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-6">Được thiết kế dựa trên các mô hình khoa học giáo dục quốc tế và bản địa hóa cho học sinh Việt Nam:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700 dark:text-slate-300">
+          <div class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold mb-1">1. Holland RIASEC</h3>
+            <p class="text-slate-500 dark:text-slate-400">Khám phá sở thích nghề nghiệp qua 6 nhóm: Kỹ thuật, Nghiên cứu, Nghệ thuật, Xã hội, Quản lý, Nghiệp vụ.</p>
+          </div>
+          <div class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold mb-1">2. Trí Thông Minh Đa Diện (MI)</h3>
+            <p class="text-slate-500 dark:text-slate-400">8 nhóm trí thông minh theo lý thuyết Howard Gardner giúp định vị thế mạnh tiếp thu.</p>
+          </div>
+          <div class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold mb-1">3. Tính Cách Big Five (OCEAN)</h3>
+            <p class="text-slate-500 dark:text-slate-400">5 chiều kích tính cách hỗ trợ tìm môi trường làm việc và học tập nhóm tối ưu.</p>
+          </div>
+          <div class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold mb-1">4. Thang Đo Bền Chí Grit & Tư Duy Phát Triển</h3>
+            <p class="text-slate-500 dark:text-slate-400">Lượng giá động lực học tập, khả năng theo đuổi mục tiêu dài hạn và vượt qua thử thách.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTGDPT 2018 & Decision Dashboard -->
+      <section class="py-12 border-t border-slate-200 dark:border-slate-800">
+        <h2 class="text-2xl font-bold font-display text-slate-900 dark:text-white mb-4">Trung Tâm Định Hướng Lớp 9–12 & Tuyển Sinh 2026</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-4">
+          Lập kế hoạch chọn tổ hợp môn lớp 10 theo đúng Chương trình GDPT 2018 (Thông tư 13/2022/TT-BGDĐT: Lịch sử, Toán, Ngữ văn, Ngoại ngữ 1 là môn bắt buộc). Đánh giá mức độ rủi ro đóng cửa ngành và đối chiếu các phương thức xét tuyển Đại học 2026 (Tốt nghiệp THPT, TSA Bách Khoa, HSA ĐHQGHN, ĐGNL ĐHQG-HCM, V-SAT, IELTS, SAT).
+        </p>
+      </section>
+
+      <!-- Trust & Child Safety -->
+      <section class="py-12 border-t border-slate-200 dark:border-slate-800">
+        <h2 class="text-2xl font-bold font-display text-slate-900 dark:text-white mb-4">An Toàn Học Đường & Quyền Riêng Tư Dữ Liệu</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-4">
+          PathAI là trợ lý đồng hành gợi mở phi phán xét. Hệ thống tích hợp giao thức bảo vệ trẻ em, tự động kết nối đường dây nóng khẩn cấp (Tổng đài 111, Đường dây nóng Ngày Mai 096 306 1414, Cấp cứu 115) khi phát hiện khủng hoảng tinh thần. Dữ liệu trắc nghiệm được lưu trữ cục bộ trên thiết bị của bạn theo Nghị định 13/2023/NĐ-CP.
+        </p>
+      </section>
+    </main>
+
+    <footer class="container mx-auto px-6 py-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
+      <div class="flex flex-wrap justify-center gap-6 mb-4 font-medium">
+        <a href="/methodology" class="hover:underline">Phương pháp khoa học</a>
+        <a href="/ai-safety" class="hover:underline">An toàn AI & Khủng hoảng</a>
+        <a href="/privacy" class="hover:underline">Chính sách bảo mật</a>
+        <a href="/terms" class="hover:underline">Điều khoản dịch vụ</a>
+        <a href="/data-sources" class="hover:underline">Nguồn dữ liệu tuyển sinh</a>
+      </div>
+      <p>© 2025–2026 PathAI Career. Hỗ trợ định hướng học tập & nghề nghiệp cho học sinh Việt Nam.</p>
+    </footer>
+  </div>
   <script type="module" src="/index.tsx"></script>
 </body>
 

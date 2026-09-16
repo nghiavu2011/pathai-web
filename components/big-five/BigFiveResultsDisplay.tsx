@@ -31,7 +31,7 @@ const BigFiveResultsDisplay: React.FC<BigFiveResultsDisplayProps> = (props) => {
 
   const resultsSummary = `Kết quả cho thấy đặc điểm tính cách nổi bật nhất của bạn là **${BIG5_DETAILS[highestTrait.key].name}**. Điều này ảnh hưởng mạnh mẽ đến cách bạn làm việc và tương tác. Ngược lại, yếu tố **${BIG5_DETAILS[lowestTrait.key].name}** ít thể hiện hơn trong tính cách của bạn.`;
 
-  const systemInstruction = `Bạn là một chuyên gia tâm lý học hành vi. Dựa trên kết quả Big Five (OCEAN) của người dùng, hãy phân tích ưu/nhược điểm của cấu trúc tính cách này trong bối cảnh công việc và cuộc sống. Đưa ra lời khuyên để phát huy điểm mạnh và hạn chế điểm yếu. Kết quả: ${JSON.stringify(results)}`;
+  const systemInstruction = `Bạn là Trợ lý AI Tham vấn Phát triển Bản thân PathAI. Dựa trên kết quả Big Five (OCEAN) của học sinh, hãy phân tích ưu điểm và lưu ý của xu hướng tính cách này trong bối cảnh học tập và làm việc nhóm, giúp học sinh tự tin phát triển bản thân. Kết quả: ${JSON.stringify(results)}`;
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, hồ sơ Big Five của bạn rất thú vị với sự nổi trội của **${BIG5_DETAILS[highestTrait.key].name}**. Tính cách này là một tài sản lớn nếu bạn biết cách sử dụng đúng môi trường. Bạn có muốn tìm hiểu xem những người có tính cách giống bạn thường thành công ở lĩnh vực nào không?`;
 
   const newsQuery = `ưu điểm và nhược điểm của tính cách ${BIG5_DETAILS[highestTrait.key].name} trong công việc`;

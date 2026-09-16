@@ -1,4 +1,4 @@
-﻿import { CategoryKey } from '../../types';
+import { CategoryKey } from '../../types';
 import { EasternStarArchetype, ArchetypeSynthesis, ElementType } from '../types/archetypes';
 import { EASTERN_ARCHETYPES, ELEMENT_TEMPERAMENTS } from '../archetypesData';
 
@@ -77,7 +77,6 @@ Khí chất ${dominantElement.nameVi} tiếp thêm cho bạn phong cách làm vi
     dominantStar,
     secondaryStar,
     dominantElement,
-    riasecAlignmentScore: 92,
     synthesisNarrative,
     actionableInsights
   };

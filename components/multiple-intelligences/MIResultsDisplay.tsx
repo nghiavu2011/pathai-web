@@ -86,10 +86,10 @@ Mỗi loại hình trí thông minh là một công cụ giúp bạn tiếp thu 
 `;
 
   const systemInstruction = `
-Bạn là Chuyên gia Tư vấn Hướng nghiệp THPT.
+Bạn là Trợ lý AI Tham vấn Học tập & Hướng nghiệp PathAI dành cho học sinh THPT.
 Phân tích kết quả Trí thông minh Đa diện (Gardner MI): ${JSON.stringify(results)}.
 Thông tin học sinh: ${studentSummary}.
-Mục tiêu: Đưa ra lời khuyên học tập, chọn tổ hợp môn và định hướng nghề nghiệp thực tế, tích cực, không phán xét.
+Mục tiêu: Đưa ra lời khuyên học tập, chọn tổ hợp môn và định hướng nghề nghiệp dưới dạng gợi ý khám phá thực tế, tích cực, không phán quyết định mệnh.
 `;
 
   const initialMessage = `Chào ${userData?.fullName || 'bạn'}, bạn sở hữu trí thông minh nổi bật về: ${topThree.map(r => r.name.split('–')[0]).join(', ')}. Bạn có muốn tìm hiểu các ngành học phát huy tốt nhất các thế mạnh này không?`;

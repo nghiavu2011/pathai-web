@@ -1,4 +1,4 @@
-﻿export type UniversityType = 'public' | 'private' | 'international';
+export type UniversityType = 'public' | 'private' | 'international';
 export type Region = 'North' | 'Central' | 'South';
 
 export interface University {
@@ -24,6 +24,13 @@ export type AdmissionMethodType =
   | 'ielts_combined' // Kết hợp chứng chỉ Tiếng Anh
   | 'hocba'; // Xét tuyển học bạ
 
+export type AdmissionRuleStatus = 
+  | 'VERIFIED_CURRENT'
+  | 'HISTORICAL_REFERENCE'
+  | 'FUTURE_NOT_PUBLISHED'
+  | 'STALE'
+  | 'UNKNOWN';
+
 export interface SubjectCombination {
   code: string; // e.g. A00, A01, D01, D07, B00
   subjects: string[]; // ['Toán', 'Vật lý', 'Hóa học']
@@ -34,8 +41,10 @@ export interface AdmissionRule {
   methodName: string;
   combinationCode?: string; // e.g. A00, A01
   minScore?: number; // Điểm sàn nộp hồ sơ
-  cutoffScoreLastYear: number; // Điểm chuẩn năm gần nhất (2024/2025)
+  cutoffScoreLastYear: number; // Điểm chuẩn năm gần nhất
   maxScale: number; // Thang điểm (30 for THPT, 100 for TSA, 150 for HSA, 1200 for ĐGNL HCM, 1600 for SAT)
+  admissionYear?: number; // e.g. 2025/2026
+  status?: AdmissionRuleStatus;
   ieltsRequirement?: {
     minOverall: number;
     convertedScoreOrBonus: string;
@@ -57,6 +66,7 @@ export interface AdmissionProgram {
 }
 
 export type FitCategory = 'dream' | 'target' | 'safe' | 'explore';
+export type AdmissionConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface ProgramMatchResult {
   program: AdmissionProgram;
@@ -64,9 +74,12 @@ export interface ProgramMatchResult {
   fitCategory: FitCategory;
   fitCategoryLabel: string;
   careerFitScore: number; // 0-100
-  academicFitScore: number; // 0-100
+  academicFitScore?: number; // 0-100 (optional if academic data missing)
+  academicReadinessStatus: 'SUFFICIENT_DATA' | 'ACADEMIC_DATA_MISSING' | 'UNKNOWN';
+  classificationConfidence: AdmissionConfidenceLevel;
   bestMethod: AdmissionRule;
-  estimatedMargin: number; // Điểm của học sinh - Điểm chuẩn
+  estimatedMargin?: number; // Điểm của học sinh - Điểm chuẩn
+  referenceYearNote: string;
   reasons: string[];
 }
 

@@ -1,4 +1,4 @@
-﻿import { University, AdmissionProgram } from './types/admissions';
+import { University, AdmissionProgram } from './types/admissions';
 
 export const UNIVERSITIES: University[] = [
   {
@@ -161,7 +161,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://ts.hust.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
   {
     id: 'hust-it-e10',
@@ -194,7 +194,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://ts.hust.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
   {
     id: 'hust-me1',
@@ -220,7 +220,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://ts.hust.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
   {
     id: 'hust-ee1',
@@ -246,7 +246,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://ts.hust.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // NEU (Kinh tế Quốc dân)
@@ -281,7 +281,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://daotao.neu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
   {
     id: 'neu-finance',
@@ -307,7 +307,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://daotao.neu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
   {
     id: 'neu-logistics',
@@ -333,7 +333,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://daotao.neu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // FTU (Ngoại Thương)
@@ -368,7 +368,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://tuyensinh.ftu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // UET (ĐH Công nghệ ĐHQGHN)
@@ -402,7 +402,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://uet.vnu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // HMU (ĐH Y Hà Nội)
@@ -431,7 +431,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://hmu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // HLU (ĐH Luật Hà Nội)
@@ -460,7 +460,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://hlu.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // HAU (ĐH Kiến trúc HN)
@@ -483,7 +483,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://hau.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // HCMUT (Bách Khoa TP.HCM)
@@ -511,7 +511,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://aao.hcmut.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // UEH (ĐH Kinh tế TP.HCM)
@@ -539,7 +539,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://tuyensinh.ueh.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // FPT (ĐH FPT)
@@ -568,7 +568,7 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://daihoc.fpt.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   },
 
   // RMIT (RMIT Việt Nam)
@@ -590,6 +590,6 @@ export const ADMISSION_PROGRAMS: AdmissionProgram[] = [
       }
     ],
     sourceUrl: 'https://rmit.edu.vn',
-    lastVerified: '2025-08-01'
+    lastVerified: '2026-03-01'
   }
 ];
